@@ -120,3 +120,23 @@ export async function getYouTubeIntegration(userId: string, internalId: string) 
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get integration' };
   }
 }
+
+export async function isYouTubeConnected(userId: string): Promise<{ connected: boolean; channelId?: string; channelName?: string }> {
+  try {
+    const [integrationData] = await db.select()
+      .from(integration)
+      .where(
+        and(
+          eq(integration.userId, userId),
+          eq(integration.providerIdentifier, 'youtube')
+        )
+      );
+    if (integrationData) {
+      return { connected: true, channelId: integrationData.internalId, channelName: integrationData.name };
+    }
+    return { connected: false };
+  } catch (error) {
+    console.error('Error checking YouTube connection:', error);
+    return { connected: false };
+  }
+}

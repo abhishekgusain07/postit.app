@@ -5,6 +5,7 @@ import { authClient } from '@/lib/auth-client';
 // @ts-ignore
 import Cookies from 'js-cookie';
 import Image from 'next/image';
+import { isYouTubeConnected } from '../actions/youtube';
 
 interface YouTubeConnectProps {
   clientId: string;
@@ -26,6 +27,7 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
   // Initialize with the same redirect URI that's registered with Google
   const youtubeProvider = new YouTubeProvider(clientId, clientSecret, redirectUri);
   const [userId, setUserId] = useState<string | null>(null);
+  const [connectedInfo, setConnectedInfo] = useState<{ connected: boolean; channelId?: string; channelName?: string } | null>(null);
   
   // Check for callback parameters early
   const isCallback = typeof window !== 'undefined' && 
@@ -35,31 +37,20 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Log the redirect URI to make sure it's correct
-        console.log('Using redirect URI:', redirectUri);
-        
         const { data: session, error } = await authClient.getSession();
         if (error) {
           console.error('Session error:', error);
           onError('Failed to get session');
           return;
         }
-        
         setUserId(session.user.id);
-        
-        // Only generate auth URL if we're not handling a callback
-        if (!isCallback) {
+        // Check if already connected
+        const connected = await isYouTubeConnected(session.user.id);
+        setConnectedInfo(connected);
+        if (!connected.connected) {
           const { url, state } = await youtubeProvider.generateAuthUrl();
           console.log('Generated OAuth state:', state);
-          
-          // Ensure secure cookie settings
-          Cookies.set('google_oauth_state', state, { 
-            expires: 1, // 1 day expiration
-            path: '/', 
-            sameSite: 'lax',
-            secure: window.location.protocol === 'https:' 
-          });
-          
+          Cookies.set('google_oauth_state', state, { path: '/', sameSite: 'lax', secure: true });
           setAuthUrl(url);
         }
       } catch (error) {
@@ -166,18 +157,25 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
         </div>
         <h2 className="youtube-title">Connect your YouTube Account</h2>
         <p className="youtube-desc">Easily connect your YouTube channel to enable seamless video uploads and management.</p>
-        <button
-          onClick={handleConnect}
-          disabled={isLoading || !authUrl}
-          className="connect-button"
-        >
-          {isLoading ? (
-            <span className="loader"></span>
-          ) : (
+        {connectedInfo && connectedInfo.connected ? (
+          <div className="connected-info">
             <Image src="/youtube.svg" alt="YouTube Logo" width={22} height={22} className="button-logo" />
-          )}
-          <span>{isLoading ? 'Connecting...' : 'Connect with YouTube'}</span>
-        </button>
+            <span className="connected-text">Connected as <b>{connectedInfo.channelName || 'YouTube Channel'}</b></span>
+          </div>
+        ) : (
+          <button
+            onClick={handleConnect}
+            disabled={isLoading || !authUrl}
+            className="connect-button"
+          >
+            {isLoading ? (
+              <span className="loader"></span>
+            ) : (
+              <Image src="/youtube.svg" alt="YouTube Logo" width={22} height={22} className="button-logo" />
+            )}
+            <span>{isLoading ? 'Connecting...' : 'Connect with YouTube'}</span>
+          </button>
+        )}
       </div>
       <style jsx>{`
         .youtube-connect-outer {
@@ -269,6 +267,23 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        .connected-info {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          background: #f6f6f6;
+          color: #222;
+          border-radius: 8px;
+          padding: 12px 18px;
+          font-size: 1.08rem;
+          font-weight: 600;
+          margin-top: 10px;
+        }
+        .connected-text b {
+          color: #ff0000;
+          font-weight: 700;
         }
       `}</style>
     </div>
