@@ -6,6 +6,7 @@ import { authClient } from '@/lib/auth-client';
 import Cookies from 'js-cookie';
 import Image from 'next/image';
 import { isYouTubeConnected } from '../actions/youtube';
+import { FaPlus, FaCheckCircle } from 'react-icons/fa';
 
 interface YouTubeConnectProps {
   clientId: string;
@@ -150,140 +151,101 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
   }, [userId, isCallback]);
 
   return (
-    <div className="youtube-connect-outer">
-      <div className="youtube-connect-card">
-        <div className="youtube-logo-row">
-          <Image src="/youtube.svg" alt="YouTube Logo" width={48} height={48} className="youtube-logo-large" />
+    <div className="youtube-connect-row">
+      <div className="youtube-connect-info">
+        <Image src="/youtube.svg" alt="YouTube Logo" width={44} height={44} className="youtube-logo" />
+        <div className="youtube-connect-texts">
+          <div className="youtube-connect-title">Connect YouTube account</div>
+          <div className="youtube-connect-subtitle">Estimated 30 seconds</div>
         </div>
-        <h2 className="youtube-title">Connect your YouTube Account</h2>
-        <p className="youtube-desc">Easily connect your YouTube channel to enable seamless video uploads and management.</p>
-        {connectedInfo && connectedInfo.connected ? (
-          <div className="connected-info">
-            <Image src="/youtube.svg" alt="YouTube Logo" width={22} height={22} className="button-logo" />
-            <span className="connected-text">Connected as <b>{connectedInfo.channelName || 'YouTube Channel'}</b></span>
-          </div>
-        ) : (
-          <button
-            onClick={handleConnect}
-            disabled={isLoading || !authUrl}
-            className="connect-button"
-          >
-            {isLoading ? (
-              <span className="loader"></span>
-            ) : (
-              <Image src="/youtube.svg" alt="YouTube Logo" width={22} height={22} className="button-logo" />
-            )}
-            <span>{isLoading ? 'Connecting...' : 'Connect with YouTube'}</span>
-          </button>
-        )}
       </div>
+      {connectedInfo && connectedInfo.connected ? (
+        <div className="youtube-connected-status">
+          <FaCheckCircle color="#22c55e" size={22} style={{ marginRight: 6 }} />
+          <span className="connected-label">Connected as <b>{connectedInfo.channelName || 'YouTube Channel'}</b></span>
+        </div>
+      ) : (
+        <button
+          onClick={handleConnect}
+          disabled={isLoading || !authUrl}
+          className="youtube-connect-btn"
+        >
+          <FaPlus style={{ marginRight: 8 }} />
+          Connect YouTube
+        </button>
+      )}
       <style jsx>{`
-        .youtube-connect-outer {
-          min-height: 100vh;
+        .youtube-connect-row {
           display: flex;
           align-items: center;
-          justify-content: center;
-          background: linear-gradient(135deg, #fff 60%, #ffeaea 100%);
-        }
-        .youtube-connect-card {
+          justify-content: space-between;
           background: #fff;
-          border-radius: 18px;
-          box-shadow: 0 6px 32px rgba(255,0,0,0.08), 0 1.5px 6px rgba(0,0,0,0.04);
-          padding: 40px 32px 32px 32px;
-          max-width: 370px;
-          width: 100%;
+          border-radius: 16px;
+          box-shadow: 0 1px 4px rgba(16,30,54,0.06);
+          padding: 20px 28px;
+          max-width: 540px;
+          margin: 40px auto;
+          gap: 18px;
+        }
+        .youtube-connect-info {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .youtube-logo {
+          border-radius: 8px;
+          background: #fff;
+          box-shadow: 0 1px 4px rgba(255,0,0,0.07);
+        }
+        .youtube-connect-texts {
           display: flex;
           flex-direction: column;
-          align-items: center;
-          transition: box-shadow 0.2s;
         }
-        .youtube-logo-row {
+        .youtube-connect-title {
+          font-size: 1.18rem;
+          font-weight: 700;
+          color: #18181b;
+        }
+        .youtube-connect-subtitle {
+          color: #6b7280;
+          font-size: 0.98rem;
+          margin-top: 2px;
+        }
+        .youtube-connect-btn {
           display: flex;
           align-items: center;
-          justify-content: center;
-          margin-bottom: 18px;
-        }
-        .youtube-logo-large {
-          border-radius: 12px;
-          background: #fff;
-          box-shadow: 0 2px 8px rgba(255,0,0,0.07);
-        }
-        .youtube-title {
-          font-size: 1.45rem;
-          font-weight: 800;
-          color: #222;
-          margin: 0 0 8px 0;
-          text-align: center;
-          letter-spacing: -0.5px;
-        }
-        .youtube-desc {
-          color: #666;
-          font-size: 1.02rem;
-          margin-bottom: 28px;
-          text-align: center;
-          line-height: 1.5;
-        }
-        .connect-button {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          background: linear-gradient(90deg, #ff0000 60%, #ff4d4d 100%);
+          background: #2563eb;
           color: #fff;
           border: none;
-          padding: 14px 0;
-          border-radius: 8px;
-          font-size: 1.08rem;
-          font-weight: 700;
+          padding: 12px 22px;
+          border-radius: 999px;
+          font-size: 1.05rem;
+          font-weight: 600;
           cursor: pointer;
-          width: 100%;
-          box-shadow: 0 2px 12px rgba(255,0,0,0.10);
-          margin-top: 10px;
-          transition: background 0.2s, box-shadow 0.2s, opacity 0.2s;
-          position: relative;
-          min-height: 48px;
+          transition: background 0.18s;
+          box-shadow: 0 1px 4px rgba(37,99,235,0.08);
         }
-        .connect-button:disabled {
+        .youtube-connect-btn:disabled {
           opacity: 0.7;
           cursor: not-allowed;
         }
-        .connect-button:hover:not(:disabled) {
-          background: linear-gradient(90deg, #e60000 60%, #ff3333 100%);
-          box-shadow: 0 4px 18px rgba(255,0,0,0.13);
+        .youtube-connect-btn:hover:not(:disabled) {
+          background: #1d4ed8;
         }
-        .button-logo {
-          margin-right: 2px;
-        }
-        .loader {
-          border: 3px solid #fff;
-          border-top: 3px solid #ff0000;
-          border-radius: 50%;
-          width: 20px;
-          height: 20px;
-          margin-right: 8px;
-          animation: spin 1s linear infinite;
-          display: inline-block;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        .connected-info {
+        .youtube-connected-status {
           display: flex;
           align-items: center;
-          justify-content: center;
-          gap: 8px;
-          background: #f6f6f6;
-          color: #222;
-          border-radius: 8px;
-          padding: 12px 18px;
-          font-size: 1.08rem;
+          background: #f1fdf7;
+          color: #15803d;
+          border-radius: 999px;
+          padding: 10px 18px;
+          font-size: 1.05rem;
           font-weight: 600;
-          margin-top: 10px;
         }
-        .connected-text b {
+        .connected-label b {
           color: #ff0000;
           font-weight: 700;
+          margin-left: 4px;
         }
       `}</style>
     </div>
