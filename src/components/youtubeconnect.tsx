@@ -151,7 +151,7 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
   }, [userId, isCallback]);
 
   return (
-    <div className="flex items-center justify-between bg-white rounded-2xl shadow-sm px-7 py-5 max-w-xl mx-auto mt-10 gap-5">
+    <div className="flex items-center justify-between bg-white rounded-2xl shadow-sm px-8 py-5 w-full max-w-2xl mx-auto gap-5">
       <div className="flex items-center gap-4">
         <Image src="/youtube.svg" alt="YouTube Logo" width={44} height={44} className="rounded-lg bg-white shadow-sm" />
         <div className="flex flex-col">
