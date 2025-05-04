@@ -4,6 +4,7 @@ import { YouTubeProvider, AuthTokenDetails } from '../providers/youtube.provider
 import { authClient } from '@/lib/auth-client';
 // @ts-ignore
 import Cookies from 'js-cookie';
+import Image from 'next/image';
 
 interface YouTubeConnectProps {
   clientId: string;
@@ -158,41 +159,116 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
   }, [userId, isCallback]);
 
   return (
-    <div className="youtube-connect">
-      <button
-        onClick={handleConnect}
-        disabled={isLoading || !authUrl || isCallback}
-        className="connect-button"
-      >
-        {isLoading ? 'Connecting...' : 'Connect YouTube Account'}
-      </button>
-      
+    <div className="youtube-connect-outer">
+      <div className="youtube-connect-card">
+        <div className="youtube-logo-row">
+          <Image src="/youtube.svg" alt="YouTube Logo" width={48} height={48} className="youtube-logo-large" />
+        </div>
+        <h2 className="youtube-title">Connect your YouTube Account</h2>
+        <p className="youtube-desc">Easily connect your YouTube channel to enable seamless video uploads and management.</p>
+        <button
+          onClick={handleConnect}
+          disabled={isLoading || !authUrl}
+          className="connect-button"
+        >
+          {isLoading ? (
+            <span className="loader"></span>
+          ) : (
+            <Image src="/youtube.svg" alt="YouTube Logo" width={22} height={22} className="button-logo" />
+          )}
+          <span>{isLoading ? 'Connecting...' : 'Connect with YouTube'}</span>
+        </button>
+      </div>
       <style jsx>{`
-        .youtube-connect {
+        .youtube-connect-outer {
+          min-height: 100vh;
           display: flex;
+          align-items: center;
           justify-content: center;
-          padding: 20px;
+          background: linear-gradient(135deg, #fff 60%, #ffeaea 100%);
         }
-        
+        .youtube-connect-card {
+          background: #fff;
+          border-radius: 18px;
+          box-shadow: 0 6px 32px rgba(255,0,0,0.08), 0 1.5px 6px rgba(0,0,0,0.04);
+          padding: 40px 32px 32px 32px;
+          max-width: 370px;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          transition: box-shadow 0.2s;
+        }
+        .youtube-logo-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 18px;
+        }
+        .youtube-logo-large {
+          border-radius: 12px;
+          background: #fff;
+          box-shadow: 0 2px 8px rgba(255,0,0,0.07);
+        }
+        .youtube-title {
+          font-size: 1.45rem;
+          font-weight: 800;
+          color: #222;
+          margin: 0 0 8px 0;
+          text-align: center;
+          letter-spacing: -0.5px;
+        }
+        .youtube-desc {
+          color: #666;
+          font-size: 1.02rem;
+          margin-bottom: 28px;
+          text-align: center;
+          line-height: 1.5;
+        }
         .connect-button {
-          background: #FF0000;
-          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          background: linear-gradient(90deg, #ff0000 60%, #ff4d4d 100%);
+          color: #fff;
           border: none;
-          padding: 12px 24px;
+          padding: 14px 0;
           border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
+          font-size: 1.08rem;
+          font-weight: 700;
           cursor: pointer;
-          transition: opacity 0.3s;
+          width: 100%;
+          box-shadow: 0 2px 12px rgba(255,0,0,0.10);
+          margin-top: 10px;
+          transition: background 0.2s, box-shadow 0.2s, opacity 0.2s;
+          position: relative;
+          min-height: 48px;
         }
-        
         .connect-button:disabled {
           opacity: 0.7;
           cursor: not-allowed;
         }
-        
         .connect-button:hover:not(:disabled) {
-          opacity: 0.9;
+          background: linear-gradient(90deg, #e60000 60%, #ff3333 100%);
+          box-shadow: 0 4px 18px rgba(255,0,0,0.13);
+        }
+        .button-logo {
+          margin-right: 2px;
+        }
+        .loader {
+          border: 3px solid #fff;
+          border-top: 3px solid #ff0000;
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          margin-right: 8px;
+          animation: spin 1s linear infinite;
+          display: inline-block;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>
