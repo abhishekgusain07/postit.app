@@ -1,8 +1,9 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Twitter } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface XConnectButtonProps {
   className?: string;
@@ -10,14 +11,24 @@ interface XConnectButtonProps {
   size?: "default" | "sm" | "lg" | "icon";
 }
 
-export function XConnectButton({ 
+export function XConnectButton({
   className = "",
   variant = "default",
   size = "default"
 }: XConnectButtonProps) {
-  const handleConnect = () => {
-    // Redirect to the X authorization API route
-    window.location.href = '/api/integrations/x/authorize';
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleConnect = async () => {
+    try {
+      setIsLoading(true);
+      // Redirect to our API route that handles Twitter OAuth
+      window.location.href = '/api/integrations/x/authorize';
+    } catch (error) {
+      console.error('Error connecting Twitter:', error);
+      toast.error('Failed to connect Twitter. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -26,9 +37,14 @@ export function XConnectButton({
       variant={variant}
       size={size}
       className={`flex items-center gap-2 ${className}`}
+      disabled={isLoading}
     >
-      <Twitter size={18} />
-      <span>Connect Twitter</span>
+      {isLoading ? (
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+      ) : (
+        <Twitter size={18} />
+      )}
+      <span>{isLoading ? 'Connecting...' : 'Connect Twitter'}</span>
     </Button>
   );
-} 
+}

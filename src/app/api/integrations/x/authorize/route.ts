@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get the current user session
     const session = await auth.api.getSession({
-        headers: await headers()
+      headers: await headers()
     });
     
     if (!session?.user?.id) {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const xProvider = new XProvider(
       process.env.X_CLIENT_ID || '',
       process.env.X_CLIENT_SECRET || '',
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/x/callback`
+      `${process.env.FRONTEND_URL}/api/integrations/x/callback`
     );
     
     // Generate auth URL with state and code verifier
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(url);
     
     // Set state and code verifier as cookies on the response
-    response.cookies.set('x_auth_state', state, { 
+    response.cookies.set('x_auth_state', state, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 10 * 60, // 10 minutes
@@ -46,9 +46,8 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('X authorization error:', error);
-    return NextResponse.json(
-      { error: 'Failed to initiate X authorization' },
-      { status: 500 }
+    return NextResponse.redirect(
+      new URL(`/integrations?error=${encodeURIComponent('Failed to initiate X authorization')}`, request.url)
     );
   }
-} 
+}

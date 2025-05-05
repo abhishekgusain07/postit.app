@@ -31,7 +31,7 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   images: {
-    domains: ['assets.aceternity.com', 'yt3.ggpht.com'],
+    domains: ['assets.aceternity.com', 'yt3.ggpht.com',"pbs.twimg.com"],
   },
   async rewrites() {
     // Only set up PostHog rewrites if enabled

@@ -3,6 +3,9 @@
 import { db } from "@/db/drizzle";
 import { integration } from "@/db/schema";
 import { eq, isNull, and } from "drizzle-orm";
+import { XProvider } from "@/providers/x.provider";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 // Type definition matching the client component's expected type
 export type Integration = {
@@ -13,6 +16,79 @@ export type Integration = {
   profile: string | null;
   createdAt: Date;
 };
+
+/**
+ * Handles Twitter/X authorization
+ * Generates authorization URL and returns it
+ */
+export async function authorizeTwitter() {
+  try {
+    // Initialize X provider
+    const xProvider = new XProvider(
+      process.env.X_CLIENT_ID || '',
+      process.env.X_CLIENT_SECRET || '',
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/x/callback`
+    );
+    
+    // Generate auth URL with state and code verifier
+    const { url, state, codeVerifier } = await xProvider.generateAuthUrl();
+    
+    // Store data to be used in the callback
+    // Note: In a real app, these could be stored in a database or session
+    // For simplicity, we're using the return value to be handled by the client
+    return { 
+      success: true, 
+      url,
+      state,
+      codeVerifier
+    };
+  } catch (error) {
+    console.error('X authorization error:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to initiate X authorization'
+    };
+  }
+}
+
+/**
+ * Completes Twitter authorization by exchanging the code for tokens
+ */
+export async function completeTwitterAuth(userId: string, code: string, codeVerifier: string) {
+  try {
+    // Initialize X provider
+    const xProvider = new XProvider(
+      process.env.X_CLIENT_ID || '',
+      process.env.X_CLIENT_SECRET || '',
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/x/callback`
+    );
+    
+    // Exchange code for tokens
+    const result = await xProvider.authenticate(code, userId, codeVerifier);
+    
+    if (result.error) {
+      return { 
+        success: false, 
+        error: result.error 
+      };
+    }
+    
+    return { 
+      success: true, 
+      data: {
+        name: result.name,
+        picture: result.picture,
+        username: result.username
+      }
+    };
+  } catch (error) {
+    console.error('X authentication completion error:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to complete X authorization'
+    };
+  }
+}
 
 /**
  * Fetches all active integrations for a user
