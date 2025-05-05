@@ -1,8 +1,13 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { YouTubeConnect } from './youtubeconnect';
 import { YouTubeUpload } from './youtubeupload';
 import { AuthTokenDetails } from '../providers/youtube.provider';
+import YoutubeConnectSkeleton from '../app/(socials)/youtube/componenet/YoutubeConnectSkeleton';
+import { isYouTubeConnected } from '../actions/youtube';
+import { authClient } from '@/lib/auth-client';
+import Image from 'next/image';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface YouTubeManagerProps {
   clientId: string;
@@ -17,6 +22,8 @@ export const YouTubeManager: React.FC<YouTubeManagerProps> = ({
 }) => {
   const [authDetails, setAuthDetails] = useState<AuthTokenDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [connectedInfo, setConnectedInfo] = useState<{ connected: boolean; channelId?: string; channelName?: string } | null>(null);
 
   const handleConnectSuccess = (details: AuthTokenDetails) => {
     setAuthDetails(details);
@@ -36,15 +43,66 @@ export const YouTubeManager: React.FC<YouTubeManagerProps> = ({
     setError(errorMessage);
   };
 
+  useEffect(() => {
+    // Fetch connection status here
+    const checkConnection = async () => {
+      // You should replace this with your real user/session logic
+      const { data: session, error } = await authClient.getSession();
+      if (!session) {
+        setLoading(false);
+        return;
+      }
+      const connected = await isYouTubeConnected(session.user.id);
+      setConnectedInfo(connected);
+      setLoading(false);
+    };
+    checkConnection();
+  }, []);
+
+  // Get initials from name or email
+  const getInitials = (name?: string): string => {
+    if (!name) return '?';
+    return name.charAt(0).toUpperCase();
+  };
+
   return (
-    <div className="youtube-manager">
+    <div className="max-w-2xl mx-auto p-5">
       {error && (
-        <div className="error-message">
+        <div className="bg-red-50 text-red-800 p-4 rounded-xl mb-5 shadow-sm">
           {error}
         </div>
       )}
 
-      {!authDetails ? (
+      {loading ? (
+        <YoutubeConnectSkeleton />
+      ) : connectedInfo && connectedInfo.connected ? (
+        <div className="flex items-center justify-between bg-white rounded-2xl shadow-sm px-8 py-5 w-full">
+          <div className="flex items-center gap-4">
+            {authDetails?.picture ? (
+              <Image 
+                src={authDetails.picture} 
+                alt={authDetails?.name || ''} 
+                className="w-11 h-11 rounded-lg" 
+                width={44} 
+                height={44} 
+              />
+            ) : (
+              <Avatar className="h-11 w-11 rounded-lg">
+                <AvatarFallback className="rounded-lg bg-red-600">
+                  {getInitials(connectedInfo.channelName || authDetails?.name)}
+                </AvatarFallback>
+              </Avatar>
+            )}
+            <div className="flex flex-col">
+              <h3 className="font-medium text-gray-900">{connectedInfo.channelName}</h3>
+              <p className="text-sm text-gray-500">Connected to YouTube</p>
+            </div>
+          </div>
+          <div className="text-sm font-medium px-4 py-2 rounded-full bg-red-50 text-red-600">
+            YouTube
+          </div>
+        </div>
+      ) : (
         <YouTubeConnect
           clientId={clientId}
           clientSecret={clientSecret}
@@ -52,72 +110,7 @@ export const YouTubeManager: React.FC<YouTubeManagerProps> = ({
           onSuccess={handleConnectSuccess}
           onError={handleConnectError}
         />
-      ) : (
-        <div className="connected-account">
-          <div className="account-info">
-            <img src={authDetails.picture} alt={authDetails.name} className="profile-picture" />
-            <div className="account-details">
-              <h3>{authDetails.name}</h3>
-              <p>@{authDetails.username}</p>
-            </div>
-          </div>
-
-          <YouTubeUpload
-            accessToken={authDetails.accessToken}
-            channelId={authDetails.id}
-            onSuccess={handleUploadSuccess}
-            onError={handleUploadError}
-          />
-        </div>
       )}
-
-      <style jsx>{`
-        .youtube-manager {
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-
-        .error-message {
-          background-color: #ffebee;
-          color: #c62828;
-          padding: 12px;
-          border-radius: 4px;
-          margin-bottom: 20px;
-        }
-
-        .connected-account {
-          background: white;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          padding: 20px;
-        }
-
-        .account-info {
-          display: flex;
-          align-items: center;
-          margin-bottom: 20px;
-          padding-bottom: 20px;
-          border-bottom: 1px solid #eee;
-        }
-
-        .profile-picture {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          margin-right: 16px;
-        }
-
-        .account-details h3 {
-          margin: 0;
-          font-size: 18px;
-        }
-
-        .account-details p {
-          margin: 4px 0 0;
-          color: #666;
-        }
-      `}</style>
     </div>
   );
 }; 
