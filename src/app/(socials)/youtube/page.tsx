@@ -2,7 +2,6 @@ import { YouTubeManager } from "@/components/youtubemanager";
 
 
 const YoutubePage = () => {
-    console.log(process.env.YOUTUBE_CLIENT_ID)
     const redirectUri = process.env.NEXT_PUBLIC_YOUTUBE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback/google';
     return (
         <div>
