@@ -237,15 +237,15 @@ export const NavbarLogo = () => {
       className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
     >
       <Image
-        src="/logov4.png"
+        src="/logo/postahead.png"
         alt="logo"
-        width={30}
-        height={30}
+        width={40}
+        height={40}
         className="rounded-lg"
       />
       
       <div className="font-sans">
-        <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-black">PrintMoney</span>
+        <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-black">postahead</span>
       </div>
     </Link>
   );
