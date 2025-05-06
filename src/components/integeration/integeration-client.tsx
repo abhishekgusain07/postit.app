@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { XConnectButton } from "./xconnectbutton";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Plus, Check } from "lucide-react";
 import Image from "next/image";
 import { 
   AlertDialog,
@@ -101,103 +101,168 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
     }
   };
   
+  // Get the provider name for display
+  const getProviderName = (provider: string) => {
+    switch (provider) {
+      case "twitter":
+        return "Twitter";
+      case "instagram":
+        return "Instagram";
+      case "facebook":
+        return "Facebook";
+      case "linkedin":
+        return "LinkedIn";
+      case "youtube":
+        return "YouTube";
+      default:
+        return provider.charAt(0).toUpperCase() + provider.slice(1);
+    }
+  };
+  
+  // Get the provider background color
+  const getProviderColor = (provider: string) => {
+    switch (provider) {
+      case "twitter":
+        return "from-blue-400 to-blue-600";
+      case "instagram":
+        return "from-purple-400 via-pink-500 to-orange-500";
+      case "facebook":
+        return "from-blue-600 to-blue-800";
+      case "linkedin":
+        return "from-blue-500 to-blue-700";
+      case "youtube":
+        return "from-red-500 to-red-700";
+      default:
+        return "from-gray-500 to-gray-700";
+    }
+  };
+  
   return (
     <div className="space-y-8">
       {/* Connect Accounts Section */}
-      <section>
-        <h2 className="text-xl font-semibold mb-4">Connect Accounts</h2>
+      <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border">
+        <h2 className="text-2xl font-bold mb-6 flex items-center">
+          <span className="bg-primary/10 text-primary p-2 rounded-full mr-3">
+            <Plus size={20} />
+          </span>
+          Connect Accounts
+        </h2>
         
-        <div className="flex flex-wrap gap-4">
-          {!isProviderConnected("twitter") && <XConnectButton />}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {!isProviderConnected("twitter") && (
+            <div className="flex flex-col items-center justify-center">
+              <XConnectButton 
+                variant="outline" 
+                className="w-full h-auto p-4 flex flex-col items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+              />
+            </div>
+          )}
           
-          {/* Add more provider connect buttons here */}
+          {/* More connect buttons would go here */}
+          
+          {/* Empty state when all platforms are connected */}
+          {Object.keys({twitter: true, youtube: true}).every(provider => isProviderConnected(provider)) && (
+            <div className="col-span-full bg-muted rounded-lg p-6 text-center">
+              <p className="text-muted-foreground">All available platforms have been connected.</p>
+            </div>
+          )}
         </div>
       </section>
       
       {/* Connected Accounts Section */}
-      <section>
-        <h2 className="text-xl font-semibold mb-4">Connected Accounts</h2>
+      <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border">
+        <h2 className="text-2xl font-bold mb-6 flex items-center">
+          <span className="bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300 p-2 rounded-full mr-3">
+            <Check size={20} />
+          </span>
+          Connected Accounts
+        </h2>
         
         {integrations.length === 0 ? (
-          <div className="bg-muted rounded-lg p-6 text-center">
-            <p>No accounts connected yet. Connect your social media accounts to get started.</p>
+          <div className="bg-muted rounded-lg p-8 text-center">
+            <p className="text-muted-foreground">No accounts connected yet. Connect your social media accounts to get started.</p>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {integrations.map((integration) => (
               <div 
                 key={integration.id}
-                className="bg-card border rounded-lg shadow-sm p-4 relative"
+                className="bg-card rounded-xl shadow-sm overflow-hidden border"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="relative w-10 h-10 shrink-0">
-                    {integration.picture ? (
-                      <Image
-                        src={integration.picture}
-                        alt={integration.name}
-                        fill
-                        className="rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-muted">
+                {/* Colored banner based on the provider */}
+                <div className={`h-3 bg-gradient-to-r ${getProviderColor(integration.providerIdentifier)}`}></div>
+                
+                <div className="p-5">
+                  <div className="flex items-center">
+                    {/* Provider Icon */}
+                    <div className="relative mr-4">
+                      <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 p-2">
                         <Image
                           src={getProviderLogo(integration.providerIdentifier)}
-                          alt={integration.providerIdentifier}
-                          width={20}
-                          height={20}
+                          alt={getProviderName(integration.providerIdentifier)}
+                          width={32}
+                          height={32}
                         />
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex-grow">
-                    <h3 className="font-medium">{integration.name}</h3>
-                    {integration.profile && (
-                      <p className="text-sm text-muted-foreground">
-                        @{integration.profile}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-destructive"
-                        disabled={isDeleting === integration.id}
-                      >
-                        {isDeleting === integration.id ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent"></div>
-                        ) : (
-                          <Trash2 size={16} />
-                        )}
-                        <span className="sr-only">Delete integration</span>
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will disconnect your {integration.providerIdentifier} account.
-                          You can reconnect it later if needed.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(integration.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    </div>
+                    
+                    {/* User Info */}
+                    <div className="flex-grow">
+                      <div className="flex items-center mb-1">
+                        <h3 className="font-semibold text-lg">{integration.name}</h3>
+                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
+                          {getProviderName(integration.providerIdentifier)}
+                        </span>
+                      </div>
+                      
+                      {integration.profile && (
+                        <p className="text-sm text-muted-foreground">
+                          @{integration.profile}
+                        </p>
+                      )}
+                    </div>
+                    
+                    {/* Delete Button */}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-destructive hover:bg-destructive/10"
+                          disabled={isDeleting === integration.id}
                         >
-                          Disconnect
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-                
-                <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
-                  Connected {formatDate(integration.createdAt)}
+                          {isDeleting === integration.id ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent"></div>
+                          ) : (
+                            <Trash2 size={16} />
+                          )}
+                          <span className="sr-only">Delete integration</span>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will disconnect your {getProviderName(integration.providerIdentifier)} account.
+                            You can reconnect it later if needed.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(integration.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Disconnect
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                  
+                  <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
+                    Connected {formatDate(integration.createdAt)}
+                  </div>
                 </div>
               </div>
             ))}
