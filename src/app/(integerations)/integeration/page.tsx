@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { Integration, getUserIntegrations } from "@/actions/integrations";
 import { toast } from "sonner";
 import { XConnectButton } from "@/components/integeration/xconnectbutton";
+import { TikTokConnectButton } from "@/components/integeration/tiktokconnectbutton";
+import { YouTubeConnect } from "@/components/youtubeconnect";
 
 // Explicitly define integration interface here to avoid type conflicts
 interface IntegrationClientType {
@@ -71,7 +73,6 @@ export default function IntegrationsPage() {
                 <p className="text-muted-foreground mt-2">
                     Connect and manage your social media accounts
                 </p>
-                
             </div>
 
             {loading ? (

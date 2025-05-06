@@ -159,8 +159,6 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
           {!isProviderConnected("twitter") && (
             <div className="flex flex-col items-center justify-center">
               <XConnectButton 
-                variant="outline" 
-                className="w-full h-auto p-4 flex flex-col items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
               />
             </div>
           )}
@@ -168,8 +166,6 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
           {!isProviderConnected("tiktok") && (
             <div className="flex flex-col items-center justify-center">
               <TikTokConnectButton 
-                variant="outline" 
-                className="w-full h-auto p-4 flex flex-col items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
               />
             </div>
           )}
