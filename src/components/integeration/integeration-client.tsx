@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { XConnectButton } from "./xconnectbutton";
+import { TikTokConnectButton } from "./tiktokconnectbutton";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Check } from "lucide-react";
@@ -83,24 +84,6 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
     }
   };
   
-  // Get the correct logo for each provider
-  const getProviderLogo = (provider: string) => {
-    switch (provider) {
-      case "twitter":
-        return "/platforms/x.png";
-      case "instagram":
-        return "/platforms/instagram.png";
-      case "facebook":
-        return "/platforms/facebook.png";
-      case "linkedin":
-        return "/platforms/linkedin.png";
-      case "youtube":
-        return "/platforms/youtube.png";
-      default:
-        return "/platforms/default.png";
-    }
-  };
-  
   // Get the provider name for display
   const getProviderName = (provider: string) => {
     switch (provider) {
@@ -114,8 +97,30 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
         return "LinkedIn";
       case "youtube":
         return "YouTube";
+      case "tiktok":
+        return "TikTok";
       default:
         return provider.charAt(0).toUpperCase() + provider.slice(1);
+    }
+  };
+  
+  // Get the provider logo for display
+  const getProviderLogo = (provider: string) => {
+    switch (provider) {
+      case "twitter":
+        return "/platforms/x.png";
+      case "instagram":
+        return "/platforms/instagram.png";
+      case "facebook":
+        return "/platforms/facebook.png";
+      case "linkedin":
+        return "/platforms/linkedin.png";
+      case "youtube":
+        return "/platforms/youtube.png";
+      case "tiktok":
+        return "/platforms/tiktok.png";
+      default:
+        return "/platforms/default.png";
     }
   };
   
@@ -132,6 +137,8 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
         return "from-blue-500 to-blue-700";
       case "youtube":
         return "from-red-500 to-red-700";
+      case "tiktok":
+        return "from-black to-gray-800";
       default:
         return "from-gray-500 to-gray-700";
     }
@@ -158,10 +165,19 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
             </div>
           )}
           
+          {!isProviderConnected("tiktok") && (
+            <div className="flex flex-col items-center justify-center">
+              <TikTokConnectButton 
+                variant="outline" 
+                className="w-full h-auto p-4 flex flex-col items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+              />
+            </div>
+          )}
+          
           {/* More connect buttons would go here */}
           
           {/* Empty state when all platforms are connected */}
-          {Object.keys({twitter: true, youtube: true}).every(provider => isProviderConnected(provider)) && (
+          {Object.keys({twitter: true, tiktok: true, youtube: true}).every(provider => isProviderConnected(provider)) && (
             <div className="col-span-full bg-muted rounded-lg p-6 text-center">
               <p className="text-muted-foreground">All available platforms have been connected.</p>
             </div>

@@ -1,32 +1,31 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Twitter } from 'lucide-react';
-import Image from 'next/image';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { toast } from "sonner";
 
-interface XConnectButtonProps {
+interface TikTokConnectButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
 }
 
-export function XConnectButton({
+export function TikTokConnectButton({
   className = "",
   variant = "default",
   size = "default"
-}: XConnectButtonProps) {
+}: TikTokConnectButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConnect = async () => {
     try {
       setIsLoading(true);
-      // Redirect to our API route that handles Twitter OAuth
-      window.location.href = '/api/integrations/x/authorize';
+      // Redirect to our API route that handles TikTok OAuth
+      window.location.href = "/api/integrations/tiktok/authorize";
     } catch (error) {
-      console.error('Error connecting Twitter:', error);
-      toast.error('Failed to connect Twitter. Please try again later.');
+      console.error("Error connecting TikTok:", error);
+      toast.error("Failed to connect TikTok. Please try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -49,15 +48,15 @@ export function XConnectButton({
         <>
           <div className={isVerticalLayout ? "mb-2" : ""}>
             <Image 
-              src="/platforms/x.png" 
-              alt="X Logo" 
+              src="/platforms/tiktok.png" 
+              alt="TikTok Logo" 
               width={isVerticalLayout ? 32 : 18} 
               height={isVerticalLayout ? 32 : 18} 
             />
           </div>
-          <span>{isLoading ? 'Connecting...' : 'Connect Twitter'}</span>
+          <span>{isLoading ? 'Connecting...' : 'Connect TikTok'}</span>
         </>
       )}
     </Button>
   );
-}
+} 
