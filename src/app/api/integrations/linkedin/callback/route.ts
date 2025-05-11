@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     const linkedinProvider = new LinkedInProvider(
       process.env.LINKEDIN_CLIENT_ID || '',
       process.env.LINKEDIN_CLIENT_SECRET || '',
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/linkedin/callback`
+      `${process.env.FRONTEND_URL}/api/integrations/linkedin/callback`
     );
     
     // Exchange the code for tokens

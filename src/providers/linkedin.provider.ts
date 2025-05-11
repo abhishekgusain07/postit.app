@@ -45,18 +45,35 @@ export class LinkedInProvider {
     this.redirectUri = redirectUri;
   }
 
+  // Updated generateAuthUrl method with debugging
   async generateAuthUrl() {
     // Create a random state string for CSRF protection
     const state = uuidv4();
     
+    // Build the URL components separately for debugging
+    const baseUrl = 'https://www.linkedin.com/oauth/v2/authorization';
+    const clientIdParam = `client_id=${this.clientId}`;
+    const redirectUriParam = `redirect_uri=${encodeURIComponent(this.redirectUri)}`;
+    const responseTypeParam = 'response_type=code';
+    const scopeParam = `scope=${encodeURIComponent(this.scopes.join(' '))}`;
+    const stateParam = `state=${state}`;
+    
+    // Full URL with all parameters
+    const url = `${baseUrl}?${clientIdParam}&${redirectUriParam}&${responseTypeParam}&${scopeParam}&${stateParam}`;
+    
+    // Log the URL and each parameter for debugging
+    console.log('LinkedIn Auth URL Components:', {
+      baseUrl,
+      clientIdParam,
+      redirectUriParam,
+      responseTypeParam,
+      scopeParam,
+      stateParam
+    });
+    console.log('Full LinkedIn Auth URL:', url);
+    
     return {
-      url: 
-        'https://www.linkedin.com/oauth/v2/authorization' +
-        `?client_id=${this.clientId}` +
-        `&redirect_uri=${encodeURIComponent(this.redirectUri)}` +
-        `&response_type=code` +
-        `&scope=${encodeURIComponent(this.scopes.join(' '))}` +
-        `&state=${state}`,
+      url,
       state
     };
   }
