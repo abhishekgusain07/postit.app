@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CalendarIcon, Clock, ImageIcon, VideoIcon, Upload, X } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Image from "next/image";
 
 const CreatePostPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -18,12 +19,50 @@ const CreatePostPage = () => {
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [scheduleType, setScheduleType] = useState<string>("now");
 
-  // Placeholder data for social accounts
+  // Updated social accounts with correct platform logos
   const socialAccounts = [
-    { id: 'youtube', name: 'YouTube', image: '/images/logos/youtube.svg', initial: 'Y' },
-    { id: 'instagram', name: 'Instagram', image: '/images/logos/instagram.svg', initial: 'I' },
-    { id: 'twitter', name: 'X (Twitter)', image: '/images/logos/twitter.svg', initial: 'X' },
-    // Add more placeholder accounts as needed
+    { 
+      id: 'youtube', 
+      name: 'YouTube', 
+      image: '/platforms/youtube.png', 
+      initial: 'Y',
+      color: 'bg-red-500'
+    },
+    { 
+      id: 'instagram', 
+      name: 'Instagram', 
+      image: '/platforms/instagram.png', 
+      initial: 'I',
+      color: 'bg-pink-500'
+    },
+    { 
+      id: 'x', 
+      name: 'X (Twitter)', 
+      image: '/platforms/x.png', 
+      initial: 'X',
+      color: 'bg-black'
+    },
+    { 
+      id: 'linkedin', 
+      name: 'LinkedIn', 
+      image: '/platforms/linkedin.png', 
+      initial: 'L',
+      color: 'bg-blue-600'
+    },
+    { 
+      id: 'facebook', 
+      name: 'Facebook', 
+      image: '/platforms/facebook.png', 
+      initial: 'F',
+      color: 'bg-blue-500'
+    },
+    { 
+      id: 'tiktok', 
+      name: 'TikTok', 
+      image: '/platforms/tiktok.png', 
+      initial: 'T',
+      color: 'bg-black'
+    }
   ];
 
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,7 +203,7 @@ const CreatePostPage = () => {
                     <div className="relative">
                       <DatePicker
                         selected={selectedDate}
-                        onChange={(date) => setSelectedDate(date)}
+                        onChange={(date: Date | null) => setSelectedDate(date)}
                         dateFormat="MMMM d, yyyy"
                         minDate={new Date()}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -179,7 +218,7 @@ const CreatePostPage = () => {
                     <div className="relative">
                       <DatePicker
                         selected={selectedDate}
-                        onChange={(date) => setSelectedDate(date)}
+                        onChange={(date: Date | null) => setSelectedDate(date)}
                         showTimeSelect
                         showTimeSelectOnly
                         timeIntervals={15}
@@ -206,10 +245,14 @@ const CreatePostPage = () => {
                 <div key={account.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-accent transition-colors">
                   <Checkbox id={`account-${account.id}`} />
                   <Label htmlFor={`account-${account.id}`} className="flex items-center space-x-3 cursor-pointer flex-1">
-                    <Avatar className="size-8">
-                      <AvatarImage src={account.image} alt={account.name} />
-                      <AvatarFallback>{account.initial}</AvatarFallback>
-                    </Avatar>
+                    <div className={`relative size-8 rounded-full overflow-hidden ${account.color}`}>
+                      <Image
+                        src={account.image}
+                        alt={account.name}
+                        fill
+                        className="object-contain p-1.5"
+                      />
+                    </div>
                     <span className="font-medium">{account.name}</span>
                   </Label>
                 </div>
