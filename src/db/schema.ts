@@ -64,7 +64,7 @@ export const subscriptions = pgTable("subscriptions", {
 	userId: text("user_id"),
   });
   
-export const subscriptionPlans = pgTable("subscriptions_plans", {
+  export const subscriptionPlans = pgTable("subscriptions_plans", {
 	id: text("id").primaryKey(),
 	createdTime: timestamp("created_time").defaultNow(),
 	planId: text("plan_id"),
@@ -75,7 +75,7 @@ export const subscriptionPlans = pgTable("subscriptions_plans", {
 	interval: text("interval"),
   });
   
-export const invoices = pgTable("invoices", {
+  export const invoices = pgTable("invoices", {
 	id: text("id").primaryKey(),
 	createdTime: timestamp("created_time").defaultNow(),
 	invoiceId: text("invoice_id"),
@@ -146,11 +146,11 @@ export const integration = pgTable('integration', {
 		// Add unique constraint for user + provider combination
 		userProviderUnique: unique('user_provider_unique').on(table.userId, table.providerIdentifier),
 	};
-});
-
-export const integrationRelations = relations(integration, ({ one }) => ({
+  });
+  
+  export const integrationRelations = relations(integration, ({ one }) => ({
 	user: one(user, {
 		fields: [integration.userId],
 		references: [user.id],
 	}),
-})); 
+  })); 

@@ -12,7 +12,7 @@ interface XConnectButtonProps {
   size?: "default" | "sm" | "lg" | "icon";
 }
 
-export function XConnectButton({
+export function XConnectButton({ 
   className = "",
   variant = "default",
   size = "default"
@@ -23,7 +23,7 @@ export function XConnectButton({
     try {
       setIsLoading(true);
       // Redirect to our API route that handles Twitter OAuth
-      window.location.href = '/api/integrations/x/authorize';
+    window.location.href = '/api/integrations/x/authorize';
     } catch (error) {
       console.error('Error connecting Twitter:', error);
       toast.error('Failed to connect Twitter. Please try again later.');
@@ -60,4 +60,4 @@ export function XConnectButton({
       )}
     </Button>
   );
-}
+} 

@@ -34,7 +34,7 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
   const isCallback = typeof window !== 'undefined' && 
     window.location.search.includes('code=') && 
     window.location.search.includes('state=');
-  
+
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -52,14 +52,14 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
           const { url, state } = await youtubeProvider.generateAuthUrl();
           console.log('Generated OAuth state:', state);
           Cookies.set('google_oauth_state', state, { path: '/', sameSite: 'lax', secure: true });
-          setAuthUrl(url);
+        setAuthUrl(url);
         }
       } catch (error) {
         console.error('Error initializing YouTube connection:', error);
         onError('Failed to initialize YouTube connection');
       }
     };
-    
+
     initializeAuth();
   }, []);
 
@@ -77,7 +77,7 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
       window.location.href = authUrl;
     }
   };
-  
+
   useEffect(() => {
     // Only handle callback when appropriate
     if (!isCallback) return;
@@ -109,13 +109,13 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
       
       // Remove the state cookie after verification
       Cookies.remove('google_oauth_state');
-    
+
       if (error) {
         console.error('OAuth error param:', error);
         onError(`YouTube connection failed: ${error}`);
         return;
       }
-    
+
       if (code) {
         setIsLoading(true);
         try {
@@ -146,7 +146,7 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
         }
       }
     };
-    
+
     handleCallback();
   }, [userId, isCallback]);
 
@@ -165,15 +165,15 @@ export const YouTubeConnect: React.FC<YouTubeConnectProps> = ({
           <span className="ml-1">Connected as <b className="text-red-600 font-bold ml-1">{connectedInfo.channelName || 'YouTube Channel'}</b></span>
         </div>
       ) : (
-        <button
-          onClick={handleConnect}
-          disabled={isLoading || !authUrl}
+      <button
+        onClick={handleConnect}
+        disabled={isLoading || !authUrl}
           className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold text-base shadow-sm transition disabled:opacity-70 disabled:cursor-not-allowed"
-        >
+      >
           <FaPlus className="mr-2" />
           Connect YouTube
-        </button>
+      </button>
       )}
     </div>
   );
-};
+}; 

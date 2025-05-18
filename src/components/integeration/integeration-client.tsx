@@ -71,8 +71,8 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
       const result = await deleteIntegration(integrationId);
       
       if (result.success) {
-        // Update the UI
-        setIntegrations(integrations.filter((i) => i.id !== integrationId));
+      // Update the UI
+      setIntegrations(integrations.filter((i) => i.id !== integrationId));
         toast.success("Integration removed successfully");
       } else {
         throw new Error(result.error || "Failed to delete integration");
@@ -224,10 +224,10 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
                           height={32}
                         />
                       </div>
-                    </div>
-                    
+                  </div>
+                  
                     {/* User Info */}
-                    <div className="flex-grow">
+                  <div className="flex-grow">
                       <div className="flex items-center mb-1">
                         <h3 className="font-semibold text-lg">{integration.name}</h3>
                         <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
@@ -235,16 +235,16 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
                         </span>
                       </div>
                       
-                      {integration.profile && (
-                        <p className="text-sm text-muted-foreground">
-                          @{integration.profile}
-                        </p>
-                      )}
-                    </div>
-                    
+                    {integration.profile && (
+                      <p className="text-sm text-muted-foreground">
+                        @{integration.profile}
+                      </p>
+                    )}
+                  </div>
+                  
                     {/* Delete Button */}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
                         <Button 
                           variant="ghost" 
                           size="icon" 
@@ -254,34 +254,34 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
                           {isDeleting === integration.id ? (
                             <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent"></div>
                           ) : (
-                            <Trash2 size={16} />
+                        <Trash2 size={16} />
                           )}
-                          <span className="sr-only">Delete integration</span>
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
+                        <span className="sr-only">Delete integration</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
                             This will disconnect your {getProviderName(integration.providerIdentifier)} account.
-                            You can reconnect it later if needed.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(integration.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Disconnect
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                  
+                          You can reconnect it later if needed.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(integration.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Disconnect
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+                
                   <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
-                    Connected {formatDate(integration.createdAt)}
+                  Connected {formatDate(integration.createdAt)}
                   </div>
                 </div>
               </div>

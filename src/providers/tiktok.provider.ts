@@ -122,7 +122,7 @@ export class TikTokProvider {
       // Store the integration in the database using server action
       await storeTikTokIntegration(
         userId,
-        internalId,
+          internalId,
         user.display_name || 'TikTok User',
         user.avatar_url,
         access_token,
@@ -159,7 +159,7 @@ export class TikTokProvider {
 
   async refreshToken(userId: string, internalId: string): Promise<{ accessToken: string; refreshToken: string }> {
     const integrationResult = await getTikTokIntegration(userId, internalId);
-    
+
     if (!integrationResult.success || !integrationResult.data?.refreshToken) {
       throw new Error('No refresh token found');
     }

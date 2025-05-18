@@ -145,8 +145,8 @@ export class InstagramProvider {
       const { success, data: integrationData } = await getInstagramIntegration(userId, internalId);
 
       if (!success || !integrationData || !integrationData.refreshToken) {
-        throw new Error('No refresh token found');
-      }
+      throw new Error('No refresh token found');
+    }
 
       const response = await this.fetch(
         'https://graph.facebook.com/v20.0/oauth/access_token' +
