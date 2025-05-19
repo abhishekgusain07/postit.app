@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, addMonths, subMonths } from "date-fns";
+import { ChevronLeft, ChevronRight, Plus, Search, Settings, Calendar as CalendarIcon, List, MoreHorizontal } from "lucide-react";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, addMonths, subMonths, getDay } from "date-fns";
 import Image from "next/image";
 
 // Types for our calendar events (scheduled posts)
@@ -15,39 +15,54 @@ interface CalendarEvent {
   date: Date;
   platform: string;
   platformIcon: string;
-  status: 'scheduled' | 'published' | 'failed';
+  status: 'scheduled' | 'published' | 'failed' | 'holiday';
+  color?: string; // for event pill color
 }
 
 // Dummy data for demonstration
 const dummyEvents: CalendarEvent[] = [
   {
     id: '1',
-    title: 'Product Launch Announcement',
-    date: new Date(2024, 3, 15, 10, 0),
-    platform: 'Instagram',
-    platformIcon: '/platforms/instagram.png',
-    status: 'scheduled'
+    title: 'Buddha Purnima/Vesak',
+    date: new Date(2025, 4, 12, 0, 0),
+    platform: 'Holiday',
+    platformIcon: '',
+    status: 'holiday',
+    color: 'bg-green-700'
   },
   {
     id: '2',
-    title: 'Weekly Tech Update',
-    date: new Date(2024, 3, 15, 14, 0),
-    platform: 'YouTube',
-    platformIcon: '/platforms/youtube.png',
-    status: 'scheduled'
+    title: 'Birthday of Rabindranat',
+    date: new Date(2025, 4, 9, 0, 0),
+    platform: 'Holiday',
+    platformIcon: '',
+    status: 'holiday',
+    color: 'bg-green-700'
   },
   {
     id: '3',
-    title: 'Company News',
-    date: new Date(2024, 3, 16, 9, 0),
-    platform: 'LinkedIn',
-    platformIcon: '/platforms/linkedin.png',
-    status: 'scheduled'
+    title: '8:45am First Study session',
+    date: new Date(2025, 4, 13, 8, 45),
+    platform: 'Personal',
+    platformIcon: '',
+    status: 'scheduled',
+    color: 'bg-blue-600'
+  },
+  {
+    id: '4',
+    title: 'Team Meeting',
+    date: new Date(2025, 4, 19, 14, 0),
+    platform: 'YouTube',
+    platformIcon: '/platforms/youtube.png',
+    status: 'scheduled',
+    color: 'bg-blue-500'
   }
 ];
 
+const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
 const CalendarPage = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date(2025, 4, 1)); // May 2025 for demo
   const [view, setView] = useState<'month' | 'week' | 'day'>('month');
 
   // Get all days in the current month
@@ -55,9 +70,13 @@ const CalendarPage = () => {
   const monthEnd = endOfMonth(currentDate);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
+  // For grid alignment: get the weekday index of the first day
+  const firstDayIdx = getDay(monthStart);
+
   // Navigation functions
   const previousMonth = () => setCurrentDate(subMonths(currentDate, 1));
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+  const goToToday = () => setCurrentDate(new Date());
 
   // Get events for a specific day
   const getEventsForDay = (date: Date) => {
@@ -65,106 +84,121 @@ const CalendarPage = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8 max-w-7xl">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold">Calendar</h1>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={previousMonth}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" onClick={nextMonth}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <span className="text-lg font-medium">
-              {format(currentDate, 'MMMM yyyy')}
-            </span>
-          </div>
+    <div className="min-h-screen bg-[#181818] text-white">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 pt-6 pb-4">
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" className="rounded-full px-4 py-1 text-base font-medium" onClick={goToToday}>
+            Today
+          </Button>
+          <Button variant="ghost" size="icon" onClick={previousMonth}>
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={nextMonth}>
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+          <span className="text-2xl font-semibold ml-4">
+            {format(currentDate, 'MMMM yyyy')}
+          </span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon"><Search className="h-5 w-5" /></Button>
+          <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
           <Select value={view} onValueChange={(value: 'month' | 'week' | 'day') => setView(value)}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Select view" />
+            <SelectTrigger className="w-[110px] bg-[#232323] border-none text-white">
+              <SelectValue placeholder="Month" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#232323] text-white">
               <SelectItem value="month">Month</SelectItem>
               <SelectItem value="week">Week</SelectItem>
               <SelectItem value="day">Day</SelectItem>
             </SelectContent>
           </Select>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            New Post
+          <Button variant="outline" className="rounded-full bg-[#232323] border-none text-white hover:bg-[#333]">
+            <CalendarIcon className="h-5 w-5 mr-2" />
+            <span>Month</span>
+          </Button>
+          <Button variant="outline" className="rounded-full bg-[#232323] border-none text-white hover:bg-[#333]">
+            <List className="h-5 w-5 mr-2" />
+            <span>Schedule</span>
+          </Button>
+          <Button variant="outline" className="rounded-full bg-[#232323] border-none text-white hover:bg-[#333]">
+            <MoreHorizontal className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-px bg-border">
-            {/* Calendar Header */}
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-              <div
-                key={day}
-                className="bg-muted/50 p-2 text-center text-sm font-medium"
-              >
-                {day}
-              </div>
-            ))}
-
-            {/* Calendar Days */}
-            {days.map((day, dayIdx) => {
-              const events = getEventsForDay(day);
-              return (
+      {/* Calendar Card */}
+      <div className="px-4 md:px-8 pb-8">
+        <Card className="rounded-2xl overflow-hidden bg-[#232323] border-none shadow-lg">
+          <CardContent className="p-0">
+            {/* Calendar Grid */}
+            <div className="grid grid-cols-7 gap-px bg-[#232323] rounded-2xl overflow-hidden">
+              {/* Calendar Header */}
+              {daysOfWeek.map((day) => (
                 <div
-                  key={day.toString()}
-                  className={`min-h-[120px] p-2 ${
-                    isSameMonth(day, currentDate)
-                      ? 'bg-background'
-                      : 'bg-muted/30'
-                  }`}
+                  key={day}
+                  className="bg-[#181818] p-3 text-center text-xs font-semibold tracking-wide text-gray-300 border-b border-[#232323]"
                 >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`text-sm ${
-                        isToday(day)
-                          ? 'bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center'
-                          : ''
-                      }`}
-                    >
-                      {format(day, 'd')}
-                    </span>
-                  </div>
-                  <div className="mt-1 space-y-1">
-                    {events.map((event) => (
-                      <div
-                        key={event.id}
-                        className="text-xs p-1 rounded bg-primary/10 hover:bg-primary/20 cursor-pointer transition-colors"
-                      >
-                        <div className="flex items-center gap-1">
-                          <div className="relative w-4 h-4">
-                            <Image
-                              src={event.platformIcon}
-                              alt={event.platform}
-                              fill
-                              className="object-contain"
-                            />
-                          </div>
-                          <span className="truncate">{event.title}</span>
-                        </div>
-                        <div className="text-muted-foreground">
-                          {format(event.date, 'h:mm a')}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  {day}
                 </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+
+              {/* Empty cells for alignment */}
+              {Array.from({ length: firstDayIdx }).map((_, idx) => (
+                <div key={"empty-" + idx} className="bg-[#181818] min-h-[90px]" />
+              ))}
+
+              {/* Calendar Days */}
+              {days.map((day) => {
+                const events = getEventsForDay(day);
+                return (
+                  <div
+                    key={day.toString()}
+                    className={`min-h-[90px] p-2 border border-[#232323] flex flex-col rounded-lg relative group ${
+                      isSameMonth(day, currentDate)
+                        ? 'bg-[#181818]' : 'bg-[#232323] opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span
+                        className={`text-xs font-semibold ${
+                          isToday(day)
+                            ? 'bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-lg'
+                            : 'text-gray-300'
+                        }`}
+                      >
+                        {format(day, 'd')}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      {events.map((event) => (
+                        <div
+                          key={event.id}
+                          className={`truncate flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-pointer ${event.color || 'bg-blue-600'} text-white hover:brightness-110 transition-all`}
+                          title={event.title}
+                        >
+                          {event.platformIcon && (
+                            <span className="relative w-4 h-4 mr-1">
+                              <Image
+                                src={event.platformIcon}
+                                alt={event.platform}
+                                fill
+                                className="object-contain"
+                              />
+                            </span>
+                          )}
+                          {event.title.length > 18 ? event.title.slice(0, 16) + '…' : event.title}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
