@@ -67,21 +67,47 @@ export default function IntegrationsPage() {
     }, []);
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold">Social Media Integrations</h1>
-                <p className="text-muted-foreground mt-2">
-                    Connect and manage your social media accounts
-                </p>
-            </div>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto">
+                <div className="bg-white shadow-2xl rounded-2xl overflow-hidden">
+                    <div className="px-6 py-8 sm:px-10 bg-gradient-to-r from-blue-500 to-purple-600">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-4xl font-extrabold text-white tracking-tight">
+                                    Social Media Integrations
+                                </h1>
+                                <p className="mt-2 text-lg text-blue-100 opacity-90">
+                                    Seamlessly connect and manage your social media ecosystem
+                                </p>
+                            </div>
+                            <div className="hidden md:block">
+                                <svg className="w-24 h-24 text-white opacity-20" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
 
-            {loading ? (
-                <div className="flex justify-center">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                    <div className="p-6 sm:p-10">
+                        {loading ? (
+                            <div className="flex justify-center items-center h-64">
+                                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                <IntegrationsClient 
+                                    integrations={integrations} 
+                                    className="transition-all duration-300 ease-in-out" 
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
-            ) : (
-                <IntegrationsClient integrations={integrations} />
-            )}
+
+                <div className="mt-8 text-center text-gray-500 text-sm">
+                    <p>Securely manage your social media connections with advanced privacy controls</p>
+                </div>
+            </div>
         </div>
     );
 } 

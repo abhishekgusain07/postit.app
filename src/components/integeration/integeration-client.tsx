@@ -35,9 +35,13 @@ type Integration = {
 
 interface IntegrationsClientProps {
   integrations: Integration[];
+  className?: string;
 }
 
-export function IntegrationsClient({ integrations: initialIntegrations }: IntegrationsClientProps) {
+export function IntegrationsClient({ 
+  integrations: initialIntegrations, 
+  className 
+}: IntegrationsClientProps) {
   const [integrations, setIntegrations] = useState<Integration[]>(initialIntegrations);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -146,7 +150,7 @@ export function IntegrationsClient({ integrations: initialIntegrations }: Integr
   };
   
   return (
-    <div className="space-y-8">
+    <div className={`space-y-8 ${className || ''}`}>
       {/* Connect Accounts Section */}
       <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border">
         <h2 className="text-2xl font-bold mb-6 flex items-center">
