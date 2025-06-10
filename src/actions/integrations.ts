@@ -4,7 +4,12 @@ import { db } from "@/db/drizzle";
 import { integration } from "@/db/schema";
 import { eq, isNull, and } from "drizzle-orm";
 import { XProvider } from "@/providers/x.provider";
-import { cookies } from "next/headers";
+import { LinkedInProvider } from "@/providers/linkedin.provider";
+import { TikTokProvider } from "@/providers/tiktok.provider";
+import { YouTubeProvider } from "@/providers/youtube.provider";
+import { InstagramProvider } from "@/providers/instagram.provider";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 // Type definition matching the client component's expected type
@@ -155,6 +160,123 @@ export async function deleteIntegration(integrationId: string) {
     return { 
       success: false, 
       error: error instanceof Error ? error.message : "Failed to delete integration" 
+    };
+  }
+}
+
+export async function refreshIntegrationToken(integrationId: string) {
+  try {
+    // Get the current user session
+    const session = await auth.api.getSession({
+      headers: await headers()
+    });
+    
+    if (!session?.user?.id) {
+      return { 
+        success: false, 
+        error: "Unauthorized",
+        redirectTo: "/sign-in"
+      };
+    }
+
+    const userId = session.user.id;
+    
+    // Fetch the specific integration
+    const [integrationData] = await db.select()
+      .from(integration)
+      .where(
+        and(
+          eq(integration.id, integrationId),
+          eq(integration.userId, userId)
+        )
+      );
+    
+    if (!integrationData) {
+      return { 
+        success: false, 
+        error: "Integration not found" 
+      };
+    }
+
+    // Determine provider and refresh accordingly
+    let refreshResult;
+    switch (integrationData.providerIdentifier) {
+      case 'twitter':
+        const xProvider = new XProvider(
+          process.env.X_CLIENT_ID || '',
+          process.env.X_CLIENT_SECRET || '',
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/x/callback`
+        );
+        refreshResult = await xProvider.refreshToken(
+          userId, 
+          integrationData.internalId
+        );
+        break;
+      
+      case 'linkedin':
+        const linkedinProvider = new LinkedInProvider(
+          process.env.LINKEDIN_CLIENT_ID || '',
+          process.env.LINKEDIN_CLIENT_SECRET || '',
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/linkedin/callback`
+        );
+        refreshResult = await linkedinProvider.refreshToken(
+          userId, 
+          integrationData.internalId
+        );
+        break;
+      
+      case 'tiktok':
+        const tiktokProvider = new TikTokProvider(
+          process.env.TIKTOK_CLIENT_KEY || '',
+          process.env.TIKTOK_CLIENT_SECRET || '',
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/tiktok/callback`
+        );
+        refreshResult = await tiktokProvider.refreshToken(
+          userId, 
+          integrationData.internalId
+        );
+        break;
+      
+      case 'youtube':
+        const youtubeProvider = new YouTubeProvider(
+          process.env.YOUTUBE_CLIENT_ID || '',
+          process.env.YOUTUBE_CLIENT_SECRET || '',
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/youtube/callback`
+        );
+        refreshResult = await youtubeProvider.refreshToken(
+          userId, 
+          integrationData.internalId
+        );
+        break;
+      
+      case 'instagram':
+        const instagramProvider = new InstagramProvider(
+          process.env.INSTAGRAM_CLIENT_ID || '',
+          process.env.INSTAGRAM_CLIENT_SECRET || '',
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/instagram/callback`
+        );
+        refreshResult = await instagramProvider.refreshToken(
+          userId, 
+          integrationData.internalId
+        );
+        break;
+      
+      default:
+        return { 
+          success: false, 
+          error: `Unsupported provider: ${integrationData.providerIdentifier}` 
+        };
+    }
+
+    return {
+      success: true,
+      message: `${integrationData.providerIdentifier.charAt(0).toUpperCase() + integrationData.providerIdentifier.slice(1)} token refreshed successfully`
+    };
+  } catch (error) {
+    console.error('Error refreshing integration token:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Failed to refresh token" 
     };
   }
 } 

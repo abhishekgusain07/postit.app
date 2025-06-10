@@ -6,7 +6,7 @@ import { TikTokConnectButton } from "./tiktokconnectbutton";
 import { LinkedInConnectButton } from "./linkedinConnectButton";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Check } from "lucide-react";
+import { Trash2, Plus, Check, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { 
   AlertDialog,
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { formatDate } from "@/lib/utils";
 import { toast } from "sonner";
-import { deleteIntegration } from "@/actions/integrations";
+import { deleteIntegration, refreshIntegrationToken } from "@/actions/integrations";
 
 // Define a type for the integrations
 type Integration = {
@@ -44,6 +44,7 @@ export function IntegrationsClient({
 }: IntegrationsClientProps) {
   const [integrations, setIntegrations] = useState<Integration[]>(initialIntegrations);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [refreshingTokens, setRefreshingTokens] = useState<string | null>(null);
   const searchParams = useSearchParams();
   
   // Check for success or error messages in the URL
@@ -86,6 +87,26 @@ export function IntegrationsClient({
       toast.error("Failed to remove integration. Please try again.");
     } finally {
       setIsDeleting(null);
+    }
+  };
+  
+  // Handle token refresh
+  const handleTokenRefresh = async (integrationId: string) => {
+    try {
+      setRefreshingTokens(integrationId);
+      
+      const result = await refreshIntegrationToken(integrationId);
+      
+      if (result.success) {
+        toast.success(result.message || 'Token refreshed successfully');
+      } else {
+        toast.error(result.error || 'Failed to refresh token');
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setRefreshingTokens(null);
     }
   };
   
@@ -228,10 +249,10 @@ export function IntegrationsClient({
                           height={32}
                         />
                       </div>
-                  </div>
-                  
+                    </div>
+                    
                     {/* User Info */}
-                  <div className="flex-grow">
+                    <div className="flex-grow">
                       <div className="flex items-center mb-1">
                         <h3 className="font-semibold text-lg">{integration.name}</h3>
                         <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
@@ -239,53 +260,72 @@ export function IntegrationsClient({
                         </span>
                       </div>
                       
-                    {integration.profile && (
-                      <p className="text-sm text-muted-foreground">
-                        @{integration.profile}
-                      </p>
-                    )}
+                      {integration.profile && (
+                        <p className="text-sm text-muted-foreground">
+                          @{integration.profile}
+                        </p>
+                      )}
+                    </div>
+                    
+                    {/* Refresh and Delete Buttons */}
+                    <div className="flex items-center space-x-2">
+                      {/* Refresh Token Button */}
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-primary hover:bg-primary/10"
+                        disabled={refreshingTokens === integration.id}
+                        onClick={() => handleTokenRefresh(integration.id)}
+                      >
+                        {refreshingTokens === integration.id ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                        ) : (
+                          <RefreshCw size={16} />
+                        )}
+                        <span className="sr-only">Refresh token</span>
+                      </Button>
+
+                      {/* Delete Button */}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-destructive hover:bg-destructive/10"
+                            disabled={isDeleting === integration.id}
+                          >
+                            {isDeleting === integration.id ? (
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent"></div>
+                            ) : (
+                              <Trash2 size={16} />
+                            )}
+                            <span className="sr-only">Delete integration</span>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will disconnect your {getProviderName(integration.providerIdentifier)} account.
+                              You can reconnect it later if needed.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(integration.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Disconnect
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                   
-                    {/* Delete Button */}
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-destructive hover:bg-destructive/10"
-                          disabled={isDeleting === integration.id}
-                        >
-                          {isDeleting === integration.id ? (
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent"></div>
-                          ) : (
-                        <Trash2 size={16} />
-                          )}
-                        <span className="sr-only">Delete integration</span>
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This will disconnect your {getProviderName(integration.providerIdentifier)} account.
-                          You can reconnect it later if needed.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(integration.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Disconnect
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-                
                   <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
-                  Connected {formatDate(integration.createdAt)}
+                    Connected {formatDate(integration.createdAt)}
                   </div>
                 </div>
               </div>
