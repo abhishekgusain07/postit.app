@@ -237,7 +237,7 @@ export class XProvider {
   async post(accessToken: string, tweetDetails: TweetDetails) {
     try {
       const { text, media } = tweetDetails;
-
+  
       // Upload media if provided
       const mediaIds: string[] = [];
       
@@ -281,36 +281,37 @@ export class XProvider {
           }
         }
       }
-
-      // Post tweet with uploaded media
-      const payload: any = { text };
+  
+      // Use v1.1 API endpoint for posting tweets (supports OAuth 2.0 Bearer tokens)
+      const payload: any = { 
+        status: text // v1.1 API uses 'status' instead of 'text'
+      };
       
       if (mediaIds.length > 0) {
-        payload.media = { media_ids: mediaIds };
+        payload.media_ids = mediaIds.join(','); // v1.1 API expects comma-separated string
       }
-      
-      if (tweetDetails.replySettings) {
-        payload.reply_settings = tweetDetails.replySettings;
-      }
-
-      // Post the tweet
+  
+      // Note: v1.1 API doesn't support reply_settings, so we'll skip that for now
+      // If you need reply settings, you'd need to implement OAuth 1.0a signing
+  
+      // Post the tweet using v1.1 API
       const postResponse = await this.fetch(
-        'https://api.twitter.com/2/tweets',
+        'https://api.twitter.com/1.1/statuses/update.json',
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': `Bearer ${accessToken}`
           },
-          body: JSON.stringify(payload)
+          body: new URLSearchParams(payload).toString()
         }
       );
-
+  
       return {
         success: true,
-        postId: postResponse.data.id,
-        tweetId: postResponse.data.id,
-        releaseURL: `https://twitter.com/i/web/status/${postResponse.data.id}`
+        postId: postResponse.id_str,
+        tweetId: postResponse.id_str,
+        releaseURL: `https://twitter.com/i/web/status/${postResponse.id_str}`
       };
     } catch (error) {
       console.error('Error posting to X:', error);
