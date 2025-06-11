@@ -39,7 +39,7 @@ const tweetSchema = z.object({
   text: z.string()
     .min(1, { message: "Tweet cannot be empty" })
     .max(280, { message: "Tweet must be 280 characters or less" }),
-  replySettings: z.enum(['everyone', 'mentionedUsers', 'following']).optional(),
+  replySettings: z.enum(['following', 'mentionedUsers', 'subscribers', 'verified']).optional(),
   media: z.array(z.object({
     url: z.string().url(),
     type: z.enum(['image', 'video']),
@@ -57,7 +57,7 @@ export default function TwitterCreatePage() {
     resolver: zodResolver(tweetSchema),
     defaultValues: {
       text: '',
-      replySettings: 'everyone',
+      replySettings: 'following',
       media: []
     }
   });
@@ -226,9 +226,10 @@ export default function TwitterCreatePage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="everyone">Everyone</SelectItem>
+                          <SelectItem value="following">Everyone</SelectItem>
                           <SelectItem value="mentionedUsers">Mentioned Users</SelectItem>
-                          <SelectItem value="following">People you follow</SelectItem>
+                          <SelectItem value="subscribers">People you follow</SelectItem>
+                          <SelectItem value="verified">Verified Users</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

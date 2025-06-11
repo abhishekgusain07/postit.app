@@ -11,16 +11,10 @@ import { InstagramProvider } from "@/providers/instagram.provider";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Integration } from "@/types";
 
 // Type definition matching the client component's expected type
-export type Integration = {
-  id: string;
-  name: string;
-  picture: string | null;
-  providerIdentifier: string;
-  profile: string | null;
-  createdAt: Date;
-};
+
 
 /**
  * Handles Twitter/X authorization
@@ -100,46 +94,161 @@ export async function completeTwitterAuth(userId: string, code: string, codeVeri
  * @param userId The ID of the user to fetch integrations for
  * @returns An array of integrations
  */
-export async function getUserIntegrations(userId: string) {
+export async function getTwitterIntegration(userId: string) {
   try {
-    // Fetch the user's integrations from the database with explicit field selection
+    // Fetch the user's integrations from the database with ALL necessary fields
     const integrationsData = await db.select({
-        id: integration.id,
-        name: integration.name,
-        picture: integration.picture,
-        providerIdentifier: integration.providerIdentifier,
-        profile: integration.profile,
-        createdAt: integration.createdAt
-      })
-      .from(integration)
-      .where(
-        and(
-          eq(integration.userId, userId),
-          isNull(integration.deletedAt)
-        )
+      id: integration.id,
+      internalId: integration.internalId,
+      name: integration.name,
+      picture: integration.picture,
+      providerIdentifier: integration.providerIdentifier,
+      type: integration.type,
+      token: integration.token, // ← THIS WAS MISSING!
+      refreshToken: integration.refreshToken, // ← THIS WAS MISSING!
+      tokenExpiration: integration.tokenExpiration, // ← THIS WAS MISSING!
+      profile: integration.profile,
+      disabled: integration.disabled,
+      refreshNeeded: integration.refreshNeeded,
+      postingTimes: integration.postingTimes,
+      additionalSettings: integration.additionalSettings,
+      createdAt: integration.createdAt,
+      updatedAt: integration.updatedAt
+    })
+    .from(integration)
+    .where(
+      and(
+        eq(integration.userId, userId),
+        eq(integration.providerIdentifier, 'twitter'), // Only get Twitter integration
+        isNull(integration.deletedAt),
+        eq(integration.disabled, false) // Only get active integrations
       )
-      .orderBy(integration.createdAt);
+    )
+    .orderBy(integration.createdAt);
 
-    // Ensure createdAt is never null by providing a default value
-    const integrations: Integration[] = integrationsData.map(item => ({
+    // Map to Integration type with proper error handling
+    const integrations: Partial<Integration>[] = integrationsData.map(item => ({
       id: item.id,
+      internalId: item.internalId,
       name: item.name,
       picture: item.picture,
       providerIdentifier: item.providerIdentifier,
+      type: item.type,
+      token: item.token, // Now included!
+      refreshToken: item.refreshToken, // Now included!
+      tokenExpiration: item.tokenExpiration, // Now included!
       profile: item.profile,
-      createdAt: item.createdAt || new Date() // Fallback to current date if null
+      disabled: item.disabled || false,
+      refreshNeeded: item.refreshNeeded || false,
+      postingTimes: item.postingTimes,
+      additionalSettings: item.additionalSettings,
+      createdAt: item.createdAt || new Date(), // Fallback to current date if null
+      updatedAt: item.updatedAt || new Date()
+    }));
+
+    // Return the first (and should be only) Twitter integration
+    const twitterIntegration = integrations[0] || null;
+
+    if (!twitterIntegration) {
+      return {
+        success: false,
+        error: "No Twitter integration found"
+      };
+    }
+
+    // Validate that we have a token
+    if (!twitterIntegration?.token) {
+      return {
+        success: false,
+        error: "Twitter integration found but no access token available. Please re-authenticate.",
+        needsReauth: true
+      };
+    }
+
+    // Check if token is expired
+    if (twitterIntegration.tokenExpiration && new Date() > new Date(twitterIntegration.tokenExpiration)) {
+      return {
+        success: false,
+        error: "Twitter token has expired. Please re-authenticate or refresh token.",
+        needsReauth: true,
+        data: twitterIntegration // Return the integration so we can attempt refresh
+      };
+    }
+
+    return { 
+      success: true, 
+      data: twitterIntegration 
+    };
+
+  } catch (error) {
+    console.error("Error fetching Twitter integration:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch Twitter integration"
+    };
+  }
+}
+
+// Also create a more general function if you need all integrations
+export async function getUserIntegrations(userId: string) {
+  try {
+    // Fetch ALL user's integrations from the database with ALL necessary fields
+    const integrationsData = await db.select({
+      id: integration.id,
+      internalId: integration.internalId,
+      name: integration.name,
+      picture: integration.picture,
+      providerIdentifier: integration.providerIdentifier,
+      type: integration.type,
+      token: integration.token,
+      refreshToken: integration.refreshToken,
+      tokenExpiration: integration.tokenExpiration,
+      profile: integration.profile,
+      disabled: integration.disabled,
+      refreshNeeded: integration.refreshNeeded,
+      postingTimes: integration.postingTimes,
+      additionalSettings: integration.additionalSettings,
+      createdAt: integration.createdAt,
+      updatedAt: integration.updatedAt
+    })
+    .from(integration)
+    .where(
+      and(
+        eq(integration.userId, userId),
+        isNull(integration.deletedAt)
+      )
+    )
+    .orderBy(integration.createdAt);
+
+    // Map to Integration type with proper error handling
+    const integrations: Partial<Integration>[] = integrationsData.map(item => ({
+      id: item.id,
+      internalId: item.internalId,
+      name: item.name,
+      picture: item.picture,
+      providerIdentifier: item.providerIdentifier,
+      type: item.type,
+      token: item.token,
+      refreshToken: item.refreshToken,
+      tokenExpiration: item.tokenExpiration,
+      profile: item.profile,
+      disabled: item.disabled || false,
+      refreshNeeded: item.refreshNeeded || false,
+      postingTimes: item.postingTimes,
+      additionalSettings: item.additionalSettings,
+      createdAt: item.createdAt || new Date(),
+      updatedAt: item.updatedAt || new Date()
     }));
 
     return { success: true, data: integrations };
   } catch (error) {
     console.error("Error fetching user integrations:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Failed to fetch integrations" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch integrations"
     };
   }
 }
-
 /**
  * Deletes an integration by ID
  * @param integrationId The ID of the integration to delete
