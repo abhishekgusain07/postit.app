@@ -226,9 +226,9 @@ export default function TwitterCreatePage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="following">Everyone</SelectItem>
+                          <SelectItem value="following">Following</SelectItem>
                           <SelectItem value="mentionedUsers">Mentioned Users</SelectItem>
-                          <SelectItem value="subscribers">People you follow</SelectItem>
+                          <SelectItem value="subscribers">Subscribers</SelectItem>
                           <SelectItem value="verified">Verified Users</SelectItem>
                         </SelectContent>
                       </Select>
