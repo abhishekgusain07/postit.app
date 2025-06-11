@@ -138,11 +138,15 @@ export class XProvider {
           additionalSettings: JSON.stringify([])
         })
         .onConflictDoUpdate({
-          target: integration.internalId,
+          target: [integration.userId, integration.providerIdentifier], // Use the actual unique constraint
           set: {
+            internalId, // Update internal ID in case it changed
+            name: user.name,
+            picture: user.profile_image_url,
             token: access_token,
             refreshToken: refresh_token,
             tokenExpiration: dayjs().add(expires_in, 'seconds').toDate(),
+            profile: user.username || '',
             updatedAt: new Date(),
             disabled: false,
             deletedAt: null
@@ -236,85 +240,104 @@ export class XProvider {
 
   async post(accessToken: string, tweetDetails: TweetDetails) {
     try {
-      const { text, media } = tweetDetails;
+      const { text, media, replySettings } = tweetDetails;
+
+      // First, validate that we have a user context token by testing with /users/me
+      try {
+        await this.fetch('https://api.twitter.com/2/users/me', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+      } catch (error) {
+        console.error('Token validation failed:', error);
+        return {
+          success: false,
+          error: 'Invalid or expired token. Please re-authenticate.',
+          needsReauth: true
+        };
+      }
   
-      // Upload media if provided
+      // Upload media if provided using v1.1 API (which supports OAuth 2.0 for media upload)
       const mediaIds: string[] = [];
       
       if (media && media.length > 0) {
         for (const m of media) {
           try {
-            // Initialize upload
-            const initResponse = await this.fetch(
-              'https://upload.twitter.com/1.1/media/upload.json?command=INIT',
-              {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${accessToken}`,
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  media_type: m.type === 'video' ? 'video/mp4' : 'image/jpeg',
-                  media_category: m.type === 'video' ? 'tweet_video' : 'tweet_image',
-                  total_bytes: 0 // This would be the actual file size in a real implementation
-                })
-              }
-            );
+            // For a real implementation, you'd need to:
+            // 1. Fetch the media from the URL
+            // 2. Get the file size and type
+            // 3. Upload in chunks if large
             
-            // In a real implementation, you would upload the actual file in chunks
-            // For brevity, this is simplified
-            
-            // Finalize media upload
-            const finalizeResponse = await this.fetch(
-              `https://upload.twitter.com/1.1/media/upload.json?command=FINALIZE&media_id=${initResponse.media_id}`,
-              {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${accessToken}`
-                }
-              }
-            );
-            
-            mediaIds.push(initResponse.media_id);
+            // This is a simplified version - you'll need to implement actual file upload
+            console.warn('Media upload not fully implemented - skipping media');
           } catch (err) {
             console.error('Error uploading media to X:', err);
           }
         }
       }
   
-      // Use v1.1 API endpoint for posting tweets (supports OAuth 2.0 Bearer tokens)
+      // Use Twitter API v2 for posting tweets
       const payload: any = { 
-        status: text // v1.1 API uses 'status' instead of 'text'
+        text: text
       };
       
+      // Add media if we have any
       if (mediaIds.length > 0) {
-        payload.media_ids = mediaIds.join(','); // v1.1 API expects comma-separated string
+        payload.media = {
+          media_ids: mediaIds
+        };
       }
+
+      // Add reply settings if specified
+      if (replySettings) {
+        payload.reply_settings = replySettings;
+      }
+
+      console.log('Posting tweet with payload:', JSON.stringify(payload, null, 2));
+      console.log('Using token (first 10 chars):', accessToken.substring(0, 10) + '...');
   
-      // Note: v1.1 API doesn't support reply_settings, so we'll skip that for now
-      // If you need reply settings, you'd need to implement OAuth 1.0a signing
-  
-      // Post the tweet using v1.1 API
+      // Post the tweet using v2 API
       const postResponse = await this.fetch(
-        'https://api.twitter.com/1.1/statuses/update.json',
+        'https://api.twitter.com/2/tweets',
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`
           },
-          body: new URLSearchParams(payload).toString()
+          body: JSON.stringify(payload)
         }
       );
   
       return {
         success: true,
-        postId: postResponse.id_str,
-        tweetId: postResponse.id_str,
-        releaseURL: `https://twitter.com/i/web/status/${postResponse.id_str}`
+        postId: postResponse.data.id,
+        tweetId: postResponse.data.id,
+        releaseURL: `https://twitter.com/i/web/status/${postResponse.data.id}`
       };
     } catch (error) {
       console.error('Error posting to X:', error);
+      
+      // Check for specific error types
+      if (error instanceof Error) {
+        if (error.message.includes('401')) {
+          return {
+            success: false,
+            error: 'Token expired or invalid. Please re-authenticate.',
+            needsReauth: true
+          };
+        }
+        
+        if (error.message.includes('403') && error.message.includes('Unsupported Authentication')) {
+          return {
+            success: false,
+            error: 'Authentication error: The token does not have user context. Please check your OAuth 2.0 flow and ensure you have the correct scopes.',
+            needsReauth: true
+          };
+        }
+      }
+      
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to post tweet',
@@ -338,4 +361,4 @@ export class XProvider {
 
     return response.json();
   }
-} 
+}
