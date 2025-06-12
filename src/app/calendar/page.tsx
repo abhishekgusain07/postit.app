@@ -273,7 +273,7 @@ const CalendarPage = () => {
           <div className="bg-[#181818] p-6 rounded-2xl">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Time Slots */}
-              {Array.from({length: 24}, (_, hour) => {
+              {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23].map((hour) => {
                 const hourDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hour);
                 const events = getEventsForDay(hourDate);
                 return (
