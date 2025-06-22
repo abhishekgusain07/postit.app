@@ -27,7 +27,7 @@ export interface TweetDetails {
   pollOptions?: string[];
   pollDurationMinutes?: number;
   // Updated to match Twitter API v2 enumeration values
-  replySettings?: 'following' | 'mentionedUsers' | 'subscribers' | 'verified';
+  replySettings?: 'following' | 'mentionedUsers' | 'subscribers' | 'verified' | 'everyone';
 }
 
 export class XProvider {
@@ -311,10 +311,21 @@ export class XProvider {
         };
       }
 
-      // Add reply settings if specified
-      if (replySettings) {
-        payload.reply_settings = replySettings;
+      // Add reply settings if specified and not 'everyone' (which is the default)
+      if (replySettings && replySettings !== 'everyone') {
+        // Map our internal values to Twitter API expected values
+        const replySettingsMap: Record<string, string> = {
+          'mentionedUsers': 'mentionedUsers',
+          'following': 'following',
+          'subscribers': 'subscribers',
+          'verified': 'verified'
+        };
+        
+        payload.reply_settings = replySettingsMap[replySettings];
       }
+
+      // Debug log the payload being sent
+      console.log('Sending payload to Twitter API:', JSON.stringify(payload, null, 2));
 
       // Post the tweet using v2 API with proper user context authentication
       const postResponse = await this.fetchWithUserContext(

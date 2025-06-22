@@ -13,7 +13,7 @@ const tweetSchema = z.object({
   text: z.string()
     .min(1, { message: "Tweet cannot be empty" })
     .max(280, { message: "Tweet must be 280 characters or less" }),
-  replySettings: z.enum(['following', 'mentionedUsers', 'subscribers', 'verified']).optional(),
+  replySettings: z.enum(['following', 'mentionedUsers', 'subscribers', 'verified', 'everyone']).optional(),
   media: z.array(z.object({
     url: z.string().url(),
     type: z.enum(['image', 'video']),
@@ -92,8 +92,14 @@ export async function checkTwitterIntegration() {
 
 export async function postTweet(formData: z.infer<typeof tweetSchema>) {
   try {
+    // Debug log the received form data
+    console.log('Received form data in postTweet:', JSON.stringify(formData, null, 2));
+    
     // Validate input
     const validatedData = tweetSchema.parse(formData);
+    
+    // Debug log the validated data
+    console.log('Validated data:', JSON.stringify(validatedData, null, 2));
 
     // Get the current session
     const session = await auth.api.getSession({

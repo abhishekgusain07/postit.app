@@ -40,7 +40,7 @@ const tweetSchema = z.object({
   text: z.string()
     .min(1, { message: "Tweet cannot be empty" })
     .max(280, { message: "Tweet must be 280 characters or less" }),
-  replySettings: z.enum(['following', 'mentionedUsers', 'subscribers', 'verified']).optional(),
+  replySettings: z.enum(['following', 'mentionedUsers', 'subscribers', 'verified', 'everyone']).optional(),
   media: z.array(z.object({
     url: z.string().url(),
     type: z.enum(['image', 'video']),
@@ -271,6 +271,7 @@ export default function TwitterCreatePage() {
                             <SelectItem value="mentionedUsers" className="hover:bg-blue-50 focus:bg-blue-50">Mentioned Users</SelectItem>
                             <SelectItem value="subscribers" className="hover:bg-blue-50 focus:bg-blue-50">Subscribers</SelectItem>
                             <SelectItem value="verified" className="hover:bg-blue-50 focus:bg-blue-50">Verified Users</SelectItem>
+                            <SelectItem value="everyone" className="hover:bg-blue-50 focus:bg-blue-50">Everyone</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage className="text-red-500" />
