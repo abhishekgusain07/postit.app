@@ -84,8 +84,26 @@ const CreatePostPage = () => {
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8 max-w-7xl">
+      {/* Beautiful Twitter Post Tool Heading */}
+      <div className="text-center mb-12">
+        <div className="relative inline-block">
+          <h1 className="text-6xl md:text-7xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-4">
+            Twitter Post Tool
+          </h1>
+          <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-lg blur opacity-20"></div>
+        </div>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Create, schedule, and share your thoughts with the world. Craft the perfect tweet with our powerful posting tool.
+        </p>
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse delay-75"></div>
+          <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse delay-150"></div>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Create New Post</h1>
+        <h2 className="text-2xl font-semibold text-muted-foreground">Create New Post</h2>
         <div className="flex gap-4">
           <Button variant="outline">Save Draft</Button>
           <Button>Create Post</Button>
