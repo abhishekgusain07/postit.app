@@ -1,4 +1,3 @@
-
 import { db } from '@/db/drizzle';
 import { integration } from '@/db/schema';
 import dayjs from 'dayjs';
@@ -30,9 +29,9 @@ export class LinkedInProvider {
   private readonly clientSecret: string;
   private readonly redirectUri: string;
   private readonly scopes = [
-    'r_liteprofile',
-    'r_emailaddress',
-    'w_member_social'
+    'openid',
+    'profile',
+    'email'
   ];
 
   constructor(
@@ -108,9 +107,9 @@ export class LinkedInProvider {
         expires_in
       } = tokenResponse;
 
-      // Get user information
-      const profileResponse = await this.fetch(
-        'https://api.linkedin.com/v2/me?projection=(id,firstName,lastName,profilePicture(displayImage~:playableStreams))',
+      // Use the new OpenID Connect userinfo endpoint
+      const userInfoResponse = await this.fetch(
+        'https://api.linkedin.com/v2/userinfo',
         {
           method: 'GET',
           headers: {
@@ -119,44 +118,19 @@ export class LinkedInProvider {
         }
       );
 
-      // Get email address
-      const emailResponse = await this.fetch(
-        'https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))',
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${access_token}`
-          }
-        }
-      );
+      // Extract user data from OpenID Connect response
+      const {
+        sub: id,
+        name,
+        given_name: firstName,
+        family_name: lastName,
+        picture,
+        email,
+        email_verified
+      } = userInfoResponse;
 
-      // Extract user data
-      const firstName = profileResponse.firstName.localized[Object.keys(profileResponse.firstName.localized)[0]];
-      const lastName = profileResponse.lastName.localized[Object.keys(profileResponse.lastName.localized)[0]];
-      const name = `${firstName} ${lastName}`;
-      const id = profileResponse.id;
-      
-      // Extract profile picture if available
-      let picture = '';
-      if (profileResponse.profilePicture && 
-          profileResponse.profilePicture["displayImage~"] && 
-          profileResponse.profilePicture["displayImage~"].elements && 
-          profileResponse.profilePicture["displayImage~"].elements.length > 0) {
-        // Get the highest resolution image
-        const images = profileResponse.profilePicture["displayImage~"].elements;
-        const highestResImage = images.reduce((prev: any, current: any) => 
-          (prev.data.width * prev.data.height > current.data.width * current.data.height) 
-            ? prev 
-            : current
-        );
-        picture = highestResImage.identifiers[0].identifier;
-      }
-      
-      // Extract email
-      let email = '';
-      if (emailResponse.elements && emailResponse.elements.length > 0) {
-        email = emailResponse.elements[0]["handle~"].emailAddress;
-      }
+      // Use name from API, or fallback to constructed name
+      const displayName = name || `${firstName || ''} ${lastName || ''}`.trim() || 'LinkedIn User';
 
       // Generate a unique internal ID
       const internalId = `linkedin_${id}`;
@@ -166,13 +140,13 @@ export class LinkedInProvider {
         .values({
           internalId,
           userId,
-          name: name || 'LinkedIn User',
-          picture,
+          name: displayName,
+          picture: picture || '',
           providerIdentifier: 'linkedin',
           type: 'social_media',
           token: access_token,
-          refreshToken: refresh_token,
-          tokenExpiration: dayjs().add(expires_in, 'seconds').toDate(),
+          refreshToken: refresh_token || '',
+          tokenExpiration: dayjs().add(expires_in || 3600, 'seconds').toDate(),
           profile: email || '',
           postingTimes: JSON.stringify([
             { time: 480 }, // 8:00 AM
@@ -185,8 +159,8 @@ export class LinkedInProvider {
           target: integration.internalId,
           set: {
             token: access_token,
-            refreshToken: refresh_token,
-            tokenExpiration: dayjs().add(expires_in, 'seconds').toDate(),
+            refreshToken: refresh_token || '',
+            tokenExpiration: dayjs().add(expires_in || 3600, 'seconds').toDate(),
             updatedAt: new Date(),
             disabled: false,
             deletedAt: null
@@ -195,11 +169,11 @@ export class LinkedInProvider {
 
       return {
         id,
-        name: name || 'LinkedIn User',
+        name: displayName,
         accessToken: access_token,
-        refreshToken: refresh_token,
-        expiresIn: expires_in,
-        picture,
+        refreshToken: refresh_token || '',
+        expiresIn: expires_in || 3600,
+        picture: picture || '',
       };
     } catch (error) {
       console.error('LinkedIn authentication error:', error);
@@ -282,7 +256,7 @@ export class LinkedInProvider {
       const { text, media } = postDetails;
       
       // Base content for the post
-      const content = {
+      const content: any = {
         author: 'urn:li:person:{person_id}', // Will be replaced with actual person ID
         lifecycleState: 'PUBLISHED',
         specificContent: {
