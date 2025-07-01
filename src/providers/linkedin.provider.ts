@@ -28,10 +28,12 @@ export class LinkedInProvider {
   private readonly clientId: string;
   private readonly clientSecret: string;
   private readonly redirectUri: string;
+  // LinkedIn scopes - note: w_member_social requires "Share on LinkedIn" product approval
   private readonly scopes = [
     'openid',
-    'profile',
-    'email'
+    'profile', 
+    'email',
+    'w_member_social'  // Required for posting content
   ];
 
   constructor(
@@ -255,9 +257,34 @@ export class LinkedInProvider {
     try {
       const { text, media } = postDetails;
       
+      // First, get the person ID from the userinfo endpoint
+      let personId: string;
+      try {
+        const userInfoResponse = await this.fetch(
+          'https://api.linkedin.com/v2/userinfo',
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          }
+        );
+        
+        personId = userInfoResponse.sub;
+        if (!personId) {
+          throw new Error('Failed to get person ID from LinkedIn API');
+        }
+      } catch (error) {
+        console.error('Error fetching LinkedIn user info:', error);
+        return {
+          success: false,
+          error: 'Failed to get user information from LinkedIn',
+        };
+      }
+      
       // Base content for the post
       const content: any = {
-        author: 'urn:li:person:{person_id}', // Will be replaced with actual person ID
+        author: `urn:li:person:${personId}`,
         lifecycleState: 'PUBLISHED',
         specificContent: {
           'com.linkedin.ugc.ShareContent': {
@@ -289,7 +316,7 @@ export class LinkedInProvider {
               body: JSON.stringify({
                 registerUploadRequest: {
                   recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
-                  owner: 'urn:li:person:{person_id}', // Will be replaced with actual person ID
+                  owner: `urn:li:person:${personId}`,
                   serviceRelationships: [{
                     relationshipType: 'OWNER',
                     identifier: 'urn:li:userGeneratedContent'
@@ -324,7 +351,7 @@ export class LinkedInProvider {
               body: JSON.stringify({
                 registerUploadRequest: {
                   recipes: ['urn:li:digitalmediaRecipe:feedshare-video'],
-                  owner: 'urn:li:person:{person_id}', // Will be replaced with actual person ID
+                  owner: `urn:li:person:${personId}`,
                   serviceRelationships: [{
                     relationshipType: 'OWNER',
                     identifier: 'urn:li:userGeneratedContent'
