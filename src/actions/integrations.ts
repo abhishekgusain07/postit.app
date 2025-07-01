@@ -51,6 +51,36 @@ export async function authorizeTwitter() {
 }
 
 /**
+ * Handles Instagram authorization
+ * Generates authorization URL and returns it
+ */
+export async function authorizeInstagram() {
+  try {
+    // Initialize Instagram provider
+    const instagramProvider = new InstagramProvider(
+      process.env.FACEBOOK_CLIENT_ID || '',
+      process.env.FACEBOOK_CLIENT_SECRET || '',
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/instagram/callback`
+    );
+    
+    // Generate auth URL with state
+    const { url, state } = await instagramProvider.generateAuthUrl();
+    
+    return { 
+      success: true, 
+      url,
+      state
+    };
+  } catch (error) {
+    console.error('Instagram authorization error:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to initiate Instagram authorization'
+    };
+  }
+}
+
+/**
  * Completes Twitter authorization by exchanging the code for tokens
  */
 export async function completeTwitterAuth(userId: string, code: string, codeVerifier: string) {

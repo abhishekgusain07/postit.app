@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { XConnectButton } from "./xconnectbutton";
 import { TikTokConnectButton } from "./tiktokconnectbutton";
 import { LinkedInConnectButton } from "./linkedinConnectButton";
+import { InstagramConnectButton } from "./instagramConnectButton";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Check, RefreshCw } from "lucide-react";
@@ -203,10 +204,17 @@ export function IntegrationsClient({
             </div>
           )}
           
+          {!isProviderConnected("instagram") && (
+            <div className="flex flex-col items-center justify-center">
+              <InstagramConnectButton 
+              />
+            </div>
+          )}
+          
           {/* More connect buttons would go here */}
           
           {/* Empty state when all platforms are connected */}
-          {Object.keys({twitter: true, tiktok: true, youtube: true, linkedin: true}).every(provider => isProviderConnected(provider)) && (
+          {Object.keys({twitter: true, tiktok: true, youtube: true, linkedin: true, instagram: true}).every(provider => isProviderConnected(provider)) && (
             <div className="col-span-full bg-muted rounded-lg p-6 text-center">
               <p className="text-muted-foreground">All available platforms have been connected.</p>
             </div>
