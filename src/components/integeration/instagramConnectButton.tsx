@@ -21,8 +21,7 @@ export function InstagramConnectButton({
   const handleConnect = async () => {
     try {
       setIsLoading(true);
-      
-      // Redirect to Instagram authorization API route
+      // Use browser redirect to trigger OAuth flow
       window.location.href = '/api/integrations/instagram/authorize';
     } catch (error) {
       console.error('Instagram connection error:', error);

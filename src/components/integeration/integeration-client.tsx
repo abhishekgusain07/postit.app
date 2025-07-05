@@ -5,6 +5,7 @@ import { XConnectButton } from "./xconnectbutton";
 import { TikTokConnectButton } from "./tiktokconnectbutton";
 import { LinkedInConnectButton } from "./linkedinConnectButton";
 import { InstagramConnectButton } from "./instagramConnectButton";
+import InstagramV2ConnectButton from "./instagramV2ConnectButton";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Check, RefreshCw } from "lucide-react";
@@ -32,6 +33,7 @@ type Integration = {
   providerIdentifier: string;
   profile: string | null;
   createdAt: Date;
+  additionalSettings?: any;
 };
 
 interface IntegrationsClientProps {
@@ -48,6 +50,9 @@ export function IntegrationsClient({
   const [refreshingTokens, setRefreshingTokens] = useState<string | null>(null);
   const searchParams = useSearchParams();
   
+  // Check for Instagram V2 account selection
+  const showInstagramV2Selection = searchParams.get("instagram_v2_selection") === "true";
+  
   // Check for success or error messages in the URL
   React.useEffect(() => {
     const success = searchParams.get("success");
@@ -58,7 +63,23 @@ export function IntegrationsClient({
     }
     
     if (error) {
-      toast.error(error);
+      // Handle specific error cases with better messages
+      switch (error) {
+        case 'no_instagram_accounts':
+          toast.error('No Instagram accounts found. Please ensure your Facebook account has Instagram accounts connected to it.');
+          break;
+        case 'invalid_request':
+          toast.error('Invalid request. Please try connecting again.');
+          break;
+        case 'invalid_state':
+          toast.error('Security validation failed. Please try connecting again.');
+          break;
+        case 'server_error':
+          toast.error('Server error occurred. Please try again later.');
+          break;
+        default:
+          toast.error(error);
+      }
     }
   }, [searchParams]);
   
@@ -66,6 +87,17 @@ export function IntegrationsClient({
   const isProviderConnected = (provider: string) => {
     return integrations.some(
       (integration) => integration.providerIdentifier === provider
+    );
+  };
+  
+  // Check if Instagram V2 is connected (by checking additionalSettings)
+  const isInstagramV2Connected = () => {
+    return integrations.some(
+      (integration) => 
+        integration.providerIdentifier === 'instagram' &&
+        integration.additionalSettings &&
+        typeof integration.additionalSettings === 'object' &&
+        (integration.additionalSettings as any).version === 'v2'
     );
   };
   
@@ -207,6 +239,15 @@ export function IntegrationsClient({
           {!isProviderConnected("instagram") && (
             <div className="flex flex-col items-center justify-center">
               <InstagramConnectButton 
+              />
+            </div>
+          )}
+          
+          {/* Instagram V2 Connect Button - Show if not connected or if account selection is needed */}
+          {(!isInstagramV2Connected() || showInstagramV2Selection) && (
+            <div className="col-span-full">
+              <InstagramV2ConnectButton 
+                showAccountSelection={showInstagramV2Selection}
               />
             </div>
           )}

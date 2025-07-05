@@ -66,8 +66,9 @@ const Footer = () => {
     { href: '#pricing', text: 'Pricing' },
     { href: 'mailto:abhishek.gusain1007fb@gmail.com', text: 'Support' },
     { href: '/comming-soon', text: 'Documentation' },
-    { href: '/terms-of-service', text: 'Terms of Service' }, // Corrected typo "Serivce" -> "Service"
-    { href: '/privacy-policy', text: 'Privacy Policy' },
+    { href: '/terms', text: 'Terms of Service' },
+    { href: '/privacy', text: 'Privacy Policy' },
+    { href: '/data-deletion', text: 'Data Deletion' },
     { href: '/license', text: 'Licence' }, // Note: 'License' is the more common spelling in US English 
   ];
 
