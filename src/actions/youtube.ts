@@ -290,8 +290,8 @@ export async function uploadYouTubeVideo(formData: z.infer<typeof youtubeVideoSc
 
     // Initialize YouTube Provider 
     const youtubeProvider = new YouTubeProvider(
-      process.env.GOOGLE_CLIENT_ID || '',
-      process.env.GOOGLE_CLIENT_SECRET || '',
+      process.env.YOUTUBE_CLIENT_ID || '',
+      process.env.YOUTUBE_CLIENT_SECRET || '',
       `${process.env.FRONTEND_URL}/api/integrations/youtube/callback`
     );
 

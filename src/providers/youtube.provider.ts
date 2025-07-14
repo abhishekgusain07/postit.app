@@ -27,6 +27,15 @@ export interface VideoDetails {
   tags?: string[];
 }
 
+export interface VideoUploadDetails {
+  filePath: string;
+  title: string;
+  description: string;
+  privacyStatus: 'public' | 'private' | 'unlisted';
+  categoryId: string;
+  tags: string[];
+}
+
 export class YouTubeProvider {
   private readonly clientId: string;
   private readonly clientSecret: string;
@@ -42,6 +51,10 @@ export class YouTubeProvider {
     clientSecret: string,
     redirectUri: string
   ) {
+    if (!clientId || !clientSecret) {
+      throw new Error('YouTube OAuth credentials are required. Please check YOUTUBE_CLIENT_ID and YOUTUBE_CLIENT_SECRET environment variables.');
+    }
+    
     this.clientId = clientId;
     this.clientSecret = clientSecret;
     this.redirectUri = redirectUri;
@@ -153,6 +166,8 @@ export class YouTubeProvider {
       client_secret_length: this.clientSecret.length,
       code_length: code.length,
       redirect_uri: this.redirectUri,
+      client_id_present: !!this.clientId,
+      client_secret_present: !!this.clientSecret,
     });
     
     const response = await fetch('https://oauth2.googleapis.com/token', {
@@ -308,5 +323,77 @@ export class YouTubeProvider {
   private async getVideoFile(videoUrl: string): Promise<Blob> {
     const response = await fetch(videoUrl);
     return await response.blob();
+  }
+
+  async uploadVideoFromFile(accessToken: string, videoDetails: VideoUploadDetails) {
+    try {
+      // Read the file from disk (only in server environment)
+      const fs = await import('fs');
+      const fileBuffer = fs.readFileSync(videoDetails.filePath);
+      
+      // Create the multipart form data
+      const boundary = '----formdata-' + Math.random().toString(36).substr(2, 16);
+      
+      // Create the metadata part
+      const metadata = {
+        snippet: {
+          title: videoDetails.title,
+          description: videoDetails.description,
+          categoryId: videoDetails.categoryId,
+          tags: videoDetails.tags,
+        },
+        status: {
+          privacyStatus: videoDetails.privacyStatus,
+        },
+      };
+
+      // Create the multipart body
+      const metadataBody = `--${boundary}\r\n` +
+        `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
+        `${JSON.stringify(metadata)}\r\n` +
+        `--${boundary}\r\n` +
+        `Content-Type: application/octet-stream\r\n\r\n`;
+
+      const endBoundary = `\r\n--${boundary}--\r\n`;
+
+      // Combine all parts
+      const metadataBuffer = Buffer.from(metadataBody);
+      const endBuffer = Buffer.from(endBoundary);
+      const fullBody = Buffer.concat([metadataBuffer, fileBuffer, endBuffer]);
+
+      // Upload to YouTube
+      const uploadResponse = await fetch(
+        'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=multipart&part=snippet,status',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': `multipart/related; boundary=${boundary}`,
+            'Content-Length': fullBody.length.toString(),
+          },
+          body: fullBody,
+        }
+      );
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error('YouTube upload error:', uploadResponse.status, errorText);
+        throw new Error(`YouTube upload failed: ${uploadResponse.status} - ${errorText}`);
+      }
+
+      const result = await uploadResponse.json();
+
+      return {
+        success: true,
+        videoId: result.id,
+        url: `https://www.youtube.com/watch?v=${result.id}`,
+      };
+    } catch (error) {
+      console.error('YouTube file upload error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to upload video',
+      };
+    }
   }
 }

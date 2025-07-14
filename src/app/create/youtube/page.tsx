@@ -43,9 +43,10 @@ const youtubeVideoSchema = z.object({
   description: z.string()
     .max(5000, { message: "Description must be 5000 characters or less" })
     .optional(),
-  videoUrl: z.string()
-    .url({ message: "Please enter a valid video URL" }),
-  privacyStatus: z.enum(['public', 'private', 'unlisted']).optional().default('private'),
+  videoFile: z.instanceof(File)
+    .refine((file) => file.size <= 256 * 1024 * 1024 * 1024, { message: "Video file must be smaller than 256GB" })
+    .refine((file) => ['video/mp4', 'video/mov', 'video/avi', 'video/quicktime', 'video/x-msvideo'].includes(file.type), { message: "Please select a valid video file (MP4, MOV, AVI)" }),
+  privacyStatus: z.enum(['public', 'private', 'unlisted']).default('private'),
   tags: z.string().optional(),
   categoryId: z.string().optional(),
 });
@@ -73,17 +74,19 @@ export default function YouTubeCreatePage() {
   const router = useRouter();
   const [isYouTubeConnected, setIsYouTubeConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStep, setUploadStep] = useState('');
   const [titleCount, setTitleCount] = useState(0);
   const [descriptionCount, setDescriptionCount] = useState(0);
 
   // Initialize form with zod resolver
   const form = useForm<YouTubeVideoFormData>({
-    resolver: zodResolver(youtubeVideoSchema),
+    resolver: zodResolver(youtubeVideoSchema) as any, // (see note below)
     defaultValues: {
       title: '',
       description: '',
-      videoUrl: '',
-      privacyStatus: 'private' as const,
+      videoFile: undefined,
+      privacyStatus: 'private',
       tags: '',
       categoryId: '22' // Default to "People & Blogs"
     }
@@ -128,6 +131,8 @@ export default function YouTubeCreatePage() {
   const onSubmit = async (values: YouTubeVideoFormData) => {
     try {
       setIsLoading(true);
+      setUploadProgress(0);
+      setUploadStep('Checking YouTube connection...');
       
       // Check YouTube integration again
       const result = await checkYouTubeIntegration();
@@ -145,11 +150,57 @@ export default function YouTubeCreatePage() {
         return;
       }
 
-      // Note: This is a simplified implementation
-      // In a real application, you would call an upload action here
-      // For now, we'll just show a success message
+      setUploadProgress(20);
+      setUploadStep('Uploading video file...');
+
+      // Upload video file to server first
+      const formData = new FormData();
+      formData.append('videoFile', values.videoFile);
+
+      const uploadResponse = await fetch('/api/upload/video', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        toast.error(errorData.error || 'Failed to upload video file');
+        return;
+      }
+
+      const uploadData = await uploadResponse.json();
       
-      toast.success('Video upload initiated! (This is a test implementation)');
+      setUploadProgress(60);
+      setUploadStep('Uploading to YouTube...');
+      
+      // Now upload to YouTube using the uploaded file
+      const youtubeUploadResponse = await fetch('/api/youtube/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          filePath: uploadData.path,
+          title: values.title,
+          description: values.description,
+          privacyStatus: values.privacyStatus,
+          categoryId: values.categoryId,
+          tags: values.tags ? values.tags.split(',').map(tag => tag.trim()) : [],
+        }),
+      });
+
+      if (!youtubeUploadResponse.ok) {
+        const errorData = await youtubeUploadResponse.json();
+        toast.error(errorData.error || 'Failed to upload video to YouTube');
+        return;
+      }
+
+      const youtubeData = await youtubeUploadResponse.json();
+      
+      setUploadProgress(100);
+      setUploadStep('Upload complete!');
+      
+      toast.success('Video uploaded to YouTube successfully!');
       form.reset(); // Clear the form
       
     } catch (error) {
@@ -157,6 +208,8 @@ export default function YouTubeCreatePage() {
       toast.error('An error occurred while uploading the video');
     } finally {
       setIsLoading(false);
+      setUploadProgress(0);
+      setUploadStep('');
     }
   };
 
@@ -264,26 +317,35 @@ export default function YouTubeCreatePage() {
 
                   <FormField
                     control={form.control}
-                    name="videoUrl"
-                    render={({ field }) => (
+                    name="videoFile"
+                    render={({ field: { onChange, value, ...field } }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700">Video URL</FormLabel>
+                        <FormLabel className="text-gray-700">Video File</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Input
-                              type="url"
-                              placeholder="https://example.com/video.mp4"
+                              type="file"
+                              accept="video/mp4,video/mov,video/avi,video/quicktime,video/x-msvideo"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  onChange(file);
+                                }
+                              }}
                               {...field}
-                              className="pl-10 border-2 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-300 rounded-xl"
+                              className="border-2 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-300 rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
                             />
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-gray-400">
-                                <path d="M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"></path>
-                              </svg>
-                            </div>
+                            {value && (
+                              <div className="mt-2 text-sm text-gray-600">
+                                Selected: {value.name} ({(value.size / (1024 * 1024)).toFixed(2)} MB)
+                              </div>
+                            )}
                           </div>
                         </FormControl>
                         <FormMessage className="text-red-500" />
+                        <p className="text-xs text-gray-500">
+                          Supported formats: MP4, MOV, AVI. Maximum size: 256GB.
+                        </p>
                       </FormItem>
                     )}
                   />
@@ -357,23 +419,40 @@ export default function YouTubeCreatePage() {
                     )}
                   />
 
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1"
-                    disabled={isLoading || titleCount > 100 || descriptionCount > 5000}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center">
-                        <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Uploading...
+                  <div className="space-y-4">
+                    {isLoading && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>{uploadStep}</span>
+                          <span>{uploadProgress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-red-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${uploadProgress}%` }}
+                          ></div>
+                        </div>
                       </div>
-                    ) : (
-                      'Upload Video'
                     )}
-                  </Button>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+                      disabled={isLoading || titleCount > 100 || descriptionCount > 5000}
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center justify-center">
+                          <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Uploading...
+                        </div>
+                      ) : (
+                        'Upload Video'
+                      )}
+                    </Button>
+                  </div>
                 </form>
               </Form>
             )}

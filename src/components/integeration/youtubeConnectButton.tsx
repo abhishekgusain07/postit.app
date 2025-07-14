@@ -20,7 +20,6 @@ export function YouTubeConnectButton({
   const handleConnect = async () => {
     try {
       setIsLoading(true);
-      // Redirect to our API route that handles YouTube OAuth
       window.location.href = '/api/integrations/youtube/authorize';
     } catch (error) {
       console.error('Error connecting YouTube:', error);
