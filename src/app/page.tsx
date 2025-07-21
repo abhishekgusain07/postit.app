@@ -34,12 +34,12 @@ export default function Home() {
   };
   
   const announcement = {
-    message: "We value your input! Please",
+    message: "🎉 New: Instagram Reels & Stories scheduling now live! ",
     link: {
-      text: "share your feedback",
+      text: "Try it now",
       url: "#feedback"
     },
-    emoji: "💬"
+    emoji: "📱"
   };
 
   // Handler for the announcement link click
@@ -55,67 +55,89 @@ export default function Home() {
     icon?: LucideIcon;
   }> = [
     {
-      title: "Authentication",
+      title: "Multi-Platform Scheduling",
       description:
-        "Complete auth system with email, social login, magic links, and MFA support for secure user management.",
-      link: "#auth",
+        "Schedule posts across Instagram, Facebook, Twitter, LinkedIn, YouTube, and TikTok from one unified dashboard.",
+      link: "#scheduling",
     },
     {
-      title: "Payments",
+      title: "Content Calendar",
       description:
-        "Stripe integration with subscription management, pricing tiers, and billing portal for smooth revenue collection.",
-      link: "#payments",
+        "Visual calendar view to plan your content strategy, see upcoming posts, and maintain consistent posting schedules.",
+      link: "#calendar",
     },
     {
-      title: "Analytics",
+      title: "AI-Powered Analytics",
       description:
-        "Built-in analytics with PostHog and error tracking with Sentry to monitor user behavior and application health.",
+        "Track engagement metrics, audience growth, and optimal posting times with AI insights to maximize your reach.",
       link: "#analytics",
     },
     {
-      title: "Database",
+      title: "Auto-Posting",
       description:
-        "Serverless PostgreSQL with Neon and Drizzle ORM for type-safe database operations with automatic scaling.",
-      link: "#database",
+        "Set it and forget it. Our reliable automation ensures your content goes live exactly when you want it to.",
+      link: "#automation",
     },
     {
-      title: "UI Components",
+      title: "Content Library",
       description:
-        "Beautiful, accessible UI components built with Radix UI and styled with Tailwind CSS for rapid development.",
-      link: "#ui",
+        "Organize your media assets, templates, and captions in one place. Reuse successful content with smart suggestions.",
+      link: "#library",
     },
     {
-      title: "Deployment",
+      title: "Team Collaboration",
       description:
-        "Optimized for deployment on Vercel with continuous integration and automatic preview deployments.",
-      link: "#deployment",
+        "Work together with approval workflows, role-based permissions, and real-time collaboration features.",
+      link: "#collaboration",
     },
   ];
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Announcement 
+      {/* <Announcement 
         show={showAnnouncement} 
         message={announcement.message}
         link={announcement.link}
         emoji={announcement.emoji}
         onDismiss={handleAnnouncementDismiss}
         onLinkClick={handleFeedbackClick}
-      />
+      /> */}
       <NavbarDemo>
         {/* Hero Section */}
-        <section className="pt-8 pb-8 px-4 md:px-8 lg:px-16 flex flex-col items-center text-center">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-200 leading-tight">
-            Ship Your SaaS <br />
-            <span className="inline-block mt-1 mb-2">Blazingly Fast</span>
+        <section className="pt-16 pb-16 px-4 md:px-8 lg:px-16 flex flex-col items-center text-center">
+          <div className="mb-6">
+            <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+              🚀 Launch Ready Social Media Management
+            </span>
+          </div>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 dark:from-purple-400 dark:via-pink-400 dark:to-blue-400 leading-tight">
+            Schedule, Manage & <br />
+            <span className="inline-block mt-1 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400">Grow Your Socials</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-xl mb-6">
-            Everything you need, ready to launch.
+          <p className="text-xl text-muted-foreground max-w-2xl mb-8 leading-relaxed">
+            Streamline your social media presence across all platforms. Schedule posts, track engagement, and grow your audience with our powerful automation tools.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link href="/dashboard" className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-md font-medium text-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
-              Get Started
+          <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <Link href="/dashboard" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105">
+              Start Scheduling Free
             </Link>
+            <Link href="#features" className="border-2 border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300">
+              See Features
+            </Link>
+          </div>
+          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>Instagram • Facebook • Twitter</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span>LinkedIn • YouTube • TikTok</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+              <span>Analytics & Automation</span>
+            </div>
           </div>
         </section>
         
@@ -123,7 +145,8 @@ export default function Home() {
         {/* Features Section */}
         <section id="features" className="py-16 px-4 md:px-8 lg:px-16 bg-secondary/20">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-16">Everything You Need</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">Powerful Social Media Management</h2>
+            <p className="text-lg text-muted-foreground text-center mb-16 max-w-2xl mx-auto">Everything you need to manage, schedule, and grow your social media presence across all platforms</p>
             <HoverEffect items={features} />
           </div>
         </section>
@@ -138,15 +161,23 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 px-4 md:px-8 lg:px-16 bg-primary/5">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
-            <p className="text-xl text-muted-foreground mb-8">
-              Launch your SaaS in record time with our production-ready template.
+        <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 dark:from-purple-950/20 dark:via-pink-950/20 dark:to-blue-950/20">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">Ready to Transform Your Social Media?</h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+              Join thousands of creators and businesses who've automated their social media success. Start your free trial today.
             </p>
-            <Link href="/sign-up" className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-md font-medium inline-block">
-              Start Building Now
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+              <Link href="/sign-up" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-10 py-4 rounded-xl font-semibold text-lg shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105">
+                Start Free Trial
+              </Link>
+              <Link href="/demo" className="border-2 border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950 px-10 py-4 rounded-xl font-semibold text-lg transition-all duration-300">
+                Book a Demo
+              </Link>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              No credit card required • 14-day free trial • Cancel anytime
+            </p>
           </div>
         </section>
         <Footer />

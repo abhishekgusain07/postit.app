@@ -4,80 +4,53 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 const TechnologyUsed = () => {
   const logos = [
     {
-      name: "Drizzle ORM",
+      name: "Facebook",
       height: "h-12",
-      src: "https://res.cloudinary.com/dowiygzq3/image/upload/v1741087634/108468352_rdoifc.png",
-      alt: "Drizzle ORM",
-      additionalClasses: "rounded-md",
-      tooltip: "Drizzle ORM"
+      src: "https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png",
+      alt: "Facebook",
+      tooltip: "Facebook"
     },
     {
-      name: "Typescript",
+      name: "Instagram",
       height: "h-12",
-      src: "https://res.cloudinary.com/dowiygzq3/image/upload/v1741087544/typescript_wrgqvm.webp",
-      alt: "Typescript",
-      tooltip: "Typescript"
+      src: "https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png",
+      alt: "Instagram",
+      tooltip: "Instagram"
     },
     {
-      name: "Better-auth",
+      name: "LinkedIn",
       height: "h-12",
-      src: "https://res.cloudinary.com/dowiygzq3/image/upload/v1740732044/163827765_qn4qmt.png",
-      alt: "Better-auth",
-      additionalClasses: "rounded-md",
-      tooltip: "Better-auth"
+      src: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png",
+      alt: "LinkedIn",
+      tooltip: "LinkedIn"
     },
     {
-      name: "Neon",
+      name: "Twitter",
       height: "h-12",
-      src: "https://res.cloudinary.com/dowiygzq3/image/upload/v1741087611/neon-logomark-dark-color_1_bzq0v2.svg",
-      alt: "Neon",
-      additionalClasses: "rounded-md",
-      tooltip: "Neon"
+      src: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
+      alt: "Twitter",
+      tooltip: "Twitter"
     },
     {
-      name: "Nextjs",
-      height: "h-5",
-      src: "/nextjs.svg",
-      alt: "Nextjs"
+      name: "TikTok",
+      height: "h-12",
+      src: "https://upload.wikimedia.org/wikipedia/commons/3/34/Ionicons_logo-tiktok.svg",
+      alt: "TikTok",
+      tooltip: "TikTok"
     },
     {
-      name: "Tailwindcss",
-      height: "h-7",
-      src: "/tailwindcss.svg",
-      alt: "Tailwindcss"
+      name: "Threads",
+      height: "h-12",
+      src: "https://upload.wikimedia.org/wikipedia/commons/9/9d/Threads_%28app%29_logo.svg",
+      alt: "Threads",
+      tooltip: "Threads"
     },
     {
-      name: "React",
+      name: "YouTube",
       height: "h-10",
-      src: "/react.svg",
-      alt: "React"
-    },
-    {
-      name: "Stripe",
-      height: "h-12",
-      src: "/stripe.svg",
-      alt: "Stripe"
-    },
-    {
-      name: "Vercel",
-      height: "h-7",
-      src: "/vercel.svg",
-      alt: "Vercel"
-    },
-    {
-        name: "Posthog",
-        height: "h-5",
-        src: "/posthog.svg",
-        alt: "Posthog"
-    },
-    {
-        name: "Sentry",
-        height: "h-8",
-        src: "/sentry.svg",
-        alt: "Sentry"
-    },
-    {
-        
+      src: "https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg",
+      alt: "YouTube",
+      tooltip: "YouTube"
     }
   ];
 
@@ -86,14 +59,15 @@ const TechnologyUsed = () => {
       <section className="bg-background/50 backdrop-blur-sm py-10 border-t border-b border-slate-100 dark:border-slate-800">
         <div className="mx-auto max-w-5xl px-6">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary/90 to-primary">Powered by Best-in-Class Technology</h2>
+            <h2 className="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">Connect All Your Social Platforms</h2>
+            <p className="text-muted-foreground mt-2">Manage your entire social media presence from one dashboard</p>
           </div>
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:gap-x-12">
             {logos.map((logo, index) => (
               logo.tooltip ? (
                 <Tooltip key={index}>
                   <TooltipTrigger asChild>
-                    <div className="filter grayscale hover:grayscale-0 hover:brightness-110 transition-all duration-300">
+                    <div className="hover:brightness-110 transition-all duration-300">
                       <img
                         className={`${logo.height} w-fit max-w-28 transition-transform duration-300 hover:scale-110 ${logo.additionalClasses || ''} cursor-help`}
                         alt={logo.alt}
@@ -107,7 +81,7 @@ const TechnologyUsed = () => {
                   </TooltipContent>
                 </Tooltip>
               ) : (
-                <div key={index} className="filter grayscale hover:grayscale-0 hover:brightness-110 transition-all duration-300">
+                <div key={index} className="hover:brightness-110 transition-all duration-300">
                   <img
                     className={`${logo.height} w-fit max-w-28 transition-transform duration-300 hover:scale-110 ${logo.additionalClasses || ''}`}
                     alt={logo.alt}
