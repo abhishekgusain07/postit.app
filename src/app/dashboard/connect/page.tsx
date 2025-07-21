@@ -103,7 +103,7 @@ export default function IntegrationsPage() {
       
       // Clear the success parameter after a short delay
       setTimeout(() => {
-        router.replace("/integrations");
+        router.replace("/dashboard/connect");
       }, 5000);
     }
 
@@ -111,7 +111,7 @@ export default function IntegrationsPage() {
       toast.error(error);
       // Clear the error parameter
       setTimeout(() => {
-        router.replace("/integrations");
+        router.replace("/dashboard/connect");
       }, 5000);
     }
   }, [searchParams, router]);

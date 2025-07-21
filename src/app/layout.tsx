@@ -24,7 +24,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <meta property="og:image" content="/postahead.png" />
+      <meta property="og:image" content="/postaheadv3.png" />
       <meta property="og:image:type" content="image/png" />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
@@ -36,7 +36,7 @@ export default function RootLayout({
         property="og:url"
         content="https://postahead.dev/"
       />
-      <meta name="twitter:image" content="/postahead.png" />
+      <meta name="twitter:image" content="/postaheadv3.png" />
       <meta name="twitter:image:type" content="image/png" />
       <meta name="twitter:image:width" content="1200" />
       <meta name="twitter:image:height" content="630" />

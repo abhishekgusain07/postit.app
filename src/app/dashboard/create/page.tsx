@@ -83,7 +83,7 @@ const CreatePostPage = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8 max-w-7xl">
+    <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8 max-w-full">
       {/* Beautiful Twitter Post Tool Heading */}
       <div className="text-center mb-12">
         <div className="relative inline-block">
