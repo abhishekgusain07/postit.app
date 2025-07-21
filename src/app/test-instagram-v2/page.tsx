@@ -1,12 +1,8 @@
-import { Metadata } from 'next';
+"use client";
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Instagram, CheckCircle, X } from 'lucide-react';
-
-export const metadata: Metadata = {
-  title: 'Instagram V2 Test - PostAhead',
-  description: 'Test page for Instagram V2 integration',
-};
 
 export default function TestInstagramV2() {
   return (

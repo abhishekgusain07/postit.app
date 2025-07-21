@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { IntegrationsClient } from "@/components/integeration/integeration-client";
 import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
-import { Integration, getUserIntegrations } from "@/actions/integrations";
+import { getUserIntegrations } from "@/actions/integrations";
 import { toast } from "sonner";
 import { XConnectButton } from "@/components/integeration/xconnectbutton";
 import { TikTokConnectButton } from "@/components/integeration/tiktokconnectbutton";
@@ -44,12 +44,12 @@ export default function IntegrationsPage() {
                 if (result.success && result.data) {
                     // Convert the server action type to the client type
                     const clientIntegrations: IntegrationClientType[] = result.data.map(item => ({
-                        id: item.id,
-                        name: item.name,
-                        picture: item.picture,
-                        providerIdentifier: item.providerIdentifier,
-                        profile: item.profile,
-                        createdAt: item.createdAt
+                        id: item.id ?? "",
+                        name: item.name ?? "",
+                        picture: item.picture ?? null,
+                        providerIdentifier: item.providerIdentifier ?? "",
+                        profile: item.profile ?? null,
+                        createdAt: item.createdAt ?? new Date(),
                     }));
                     setIntegrations(clientIntegrations);
                 } else {

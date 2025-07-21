@@ -8,6 +8,7 @@ import { Integration } from '@/types';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { z } from 'zod';
+import { YouTubeProvider } from "@/providers/youtube.provider";
 
 // Zod schema for YouTube video validation
 const youtubeVideoSchema = z.object({

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { completeTwitterAuth } from '@/actions/integrations';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
 
-export default function OAuthCallbackPage() {
+function OAuthCallbackContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(true);
@@ -100,5 +100,19 @@ export default function OAuthCallbackPage() {
         <p>Redirecting...</p>
       )}
     </div>
+  );
+}
+
+export default function OAuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <h1 className="text-xl font-semibold mb-2">Processing Authorization</h1>
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    }>
+      <OAuthCallbackContent />
+    </Suspense>
   );
 } 

@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { integrationId: string } }
+  { params }: { params: Promise<{ integrationId: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -22,7 +22,7 @@ export async function DELETE(
     }
     
     const userId = session.user.id;
-    const { integrationId } = params;
+    const { integrationId } = await params;
     
     if (!integrationId) {
       return NextResponse.json(

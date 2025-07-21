@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { redirect } from "next/navigation";
-import { Integration, getUserIntegrations } from "@/actions/integrations";
+import { getUserIntegrations } from "@/actions/integrations";
 import { IntegrationsClient } from "@/components/integeration/integeration-client";
 import { Check, CheckCircle2 } from "lucide-react";
 
@@ -19,7 +19,7 @@ interface IntegrationClientType {
   createdAt: Date;
 }
 
-export default function IntegrationsPage() {
+function IntegrationsContent() {
   const [loading, setLoading] = useState(true);
   const [integrations, setIntegrations] = useState<IntegrationClientType[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -69,12 +69,12 @@ export default function IntegrationsPage() {
         if (result.success && result.data) {
           // Convert the server action type to the client type
           const clientIntegrations: IntegrationClientType[] = result.data.map((item) => ({
-            id: item.id,
-            name: item.name,
-            picture: item.picture,
-            providerIdentifier: item.providerIdentifier,
-            profile: item.profile,
-            createdAt: item.createdAt,
+            id: item.id !,
+            name: item.name!,
+            picture: item.picture!,
+            providerIdentifier: item.providerIdentifier!,
+            profile: item.profile!,
+            createdAt: item.createdAt!,
           }));
           setIntegrations(clientIntegrations);
         } else {
@@ -148,5 +148,25 @@ export default function IntegrationsPage() {
         <IntegrationsClient integrations={integrations} />
       )}
     </div>
+  );
+}
+
+export default function IntegrationsPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">Social Media Integrations</h1>
+          <p className="text-muted-foreground mt-2">
+            Connect and manage your social media accounts
+          </p>
+        </div>
+        <div className="flex justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      </div>
+    }>
+      <IntegrationsContent />
+    </Suspense>
   );
 } 
