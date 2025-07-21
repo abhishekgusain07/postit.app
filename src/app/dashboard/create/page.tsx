@@ -118,7 +118,7 @@ const CreatePostPage = () => {
 
       {/* Coming Soon Section */}
       <div className="mt-24 text-center">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto mt-10">
           <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
             More Platforms Coming Soon
           </h3>
